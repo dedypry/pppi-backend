@@ -24,7 +24,7 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             source "$NVM_DIR/nvm.sh"
             cd /www/wwwroot/pppi-backend
-            git reset --hard origin main
+            git reset --hard origin/main
             git pull
             pnpm install
             pnpm knex migrate:latest
