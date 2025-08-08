@@ -1,0 +1,149 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { MemberCreateDto } from './dto/create.dto';
+import { ProvinceModel } from 'models/Province.model';
+import { CityModel } from 'models/Citie.model';
+import { UserModel } from 'models/User.model';
+import * as dayjs from 'dayjs';
+import { hashPassword } from 'utils/helpers/bcrypt';
+import { PaginationDto } from 'utils/dto/pagination.dto';
+import { RoleModel } from 'models/Role.model';
+import MemberApprovedDto from './dto/approved.dto';
+import { fn } from 'objection';
+import { FileModel } from 'models/File.model';
+
+interface IGenNia {
+  provinceId: number;
+  cityId: number;
+  joinYear?: number;
+  sort?: number;
+  dateBirth: string;
+}
+
+@Injectable()
+export class MembersService {
+  async list(query: PaginationDto) {
+    return await UserModel.query()
+      .modify('list')
+      .whereNull('deleted_at')
+      .withGraphFetched('[profile.[province, city, district] ]')
+      .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
+      .page(query.page, query.pageSize);
+  }
+
+  async detail(id: number) {
+    return await UserModel.query()
+      .modify('list')
+      .withGraphFetched('[profile.[province, city, district] ]')
+      .findById(id);
+  }
+
+  async create(body: MemberCreateDto) {
+    const { nia, sort, year } = await this.generateNia({
+      provinceId: body.province_id,
+      cityId: body.city_id,
+      dateBirth: body.date_birth,
+      sort: body?.sort,
+      joinYear: body.join_year,
+    });
+
+    const user: any = await UserModel.query().upsertGraphAndFetch({
+      id: body.id,
+      email: body.email,
+      name: body.name,
+      sort: sort as any,
+      nia,
+      join_year: year as string,
+      ...(!body?.id && {
+        status: 'submission',
+        is_active: false,
+        is_organization: false,
+        password: hashPassword(dayjs(body.date_birth).format('ddmmYYYY')),
+      }),
+      front_title: body.front_title,
+      back_title: body.back_title,
+      profile: {
+        id: body.profile_id,
+        nik: body.nik,
+        place_birth: body.place_birth,
+        date_birth: body.date_birth,
+        gender: body.gender,
+        citizenship: body.citizenship.toLocaleLowerCase(),
+        address: body.address,
+        province_id: body.province_id,
+        city_id: body.city_id,
+        district_id: body.district_id,
+        phone: body.phone,
+        last_education_nursing: body.last_education_nursing,
+        last_education: body.last_education,
+        workplace: body.workplace,
+        hope_in: body.hope_in,
+        contribution: body.contribution,
+        is_member_payment: body.is_member_payment,
+        member_payment_file: body.member_payment_file,
+        reason_reject: body.reason_reject,
+        photo: body.photo,
+      },
+    } as any);
+
+    if (!body.id) {
+      const role = await RoleModel.query().findOne('title', 'member');
+      await role?.$relatedQuery('users').relate(user.id);
+    }
+
+    await FileModel.query()
+      .whereIn('url', [body?.member_payment_file as string, body.photo])
+      .update({
+        parent_id: user.id,
+      });
+
+    return `Member berhasil ${body.id ? 'diperbaharui' : 'ditambahkan'}`;
+  }
+
+  async generateNia(data: IGenNia) {
+    const province = await ProvinceModel.query().findById(data.provinceId);
+    const city = await CityModel.query().findById(data.cityId);
+    const { max }: any = await UserModel.query().max('sort').first();
+    const sortNumber = String(data?.sort || max + 1 || 1).padStart(4, '0');
+    const year = data.joinYear || dayjs().format('YY');
+    const birtDate = dayjs(data.dateBirth).format('YY');
+
+    const cityCode =
+      (city?.code || 0) < 10 ? String(city?.code).padStart(2, '0') : city?.code;
+
+    const provinceCode =
+      (province?.code || 0) < 10
+        ? String(province?.code).padStart(2, '0')
+        : province?.code;
+
+    return {
+      nia: `${year}.${provinceCode}.${cityCode}.${birtDate}.${sortNumber}`,
+      sort: Number(sortNumber),
+      year,
+    };
+  }
+
+  async updateApproved(body: MemberApprovedDto, id: number, userId: number) {
+    const member = await UserModel.query().findById(id);
+
+    if (!member) throw new NotFoundException();
+
+    const status = body.approved ? 'approved' : 'rejected';
+
+    await member.$query().update({
+      status: status,
+      ...(body.approved
+        ? {
+            approved_at: fn.now(),
+            approved_by: userId,
+            is_active: true,
+          }
+        : {
+            rejected_note: body?.rejected_note,
+            rejected_at: fn.now(),
+            rejected_by: userId,
+          }),
+    });
+
+    return 'Member berhasil di update';
+  }
+}
