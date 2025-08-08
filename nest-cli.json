@@ -5,7 +5,14 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/pppi-be-nest/tsconfig.app.json"
+    "tsConfigPath": "apps/pppi-be-nest/tsconfig.app.json",
+    "assets": [
+      {
+        "include": "../src/views/**/**",
+        "outDir": "./dist/apps/pppi-be-nest",
+        "watchAssets": true
+      }
+    ]
   },
   "monorepo": true,
   "root": "apps/pppi-be-nest",

@@ -1,0 +1,105 @@
+<html lang='en'>
+
+  <head>
+    <meta charset='UTF-8' />
+    <title>KTA</title>
+    <style>
+      @page {
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .page {
+        width: 100%;
+        height: 100vh;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        position: relative;
+      }
+
+      .page-break {
+        page-break-after: always;
+      }
+
+      #page-1 {
+        background-image: url('http://127.0.0.1:9876/bg-kta.png');
+      }
+
+      #page-2 {
+        background-image: url('http://127.0.0.1:9876/bg-kta-1.png');
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        padding: 60px;
+        color: #000;
+        min-height: 673px;
+      }
+
+      .content-profile {
+        position: absolute;
+        bottom: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+      }
+
+      .nia {
+        font-size: 40px;
+        color: white;
+        font-weight: bold;
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class='page page-break' id='page-1'>
+      <div class='content'>
+        <div class='content-profile'>
+          <img
+            src='{{profile.photo}}'
+            alt='Profile Photo'
+            style='width: 300px; height: 330px; margin-bottom: 10px; object-fit: cover; border-radius: 30px; border: 4px solid #00FF1B;'
+          />
+
+          {{#if front_title}}
+            <p
+              style='font-size: 30px; color: #00FF1B; padding: 0; margin: 0; font-weight: bold;'
+            >
+              {{front_title}}.
+              {{name}}{{#if back_title}}, {{back_title}}{{/if}}
+            </p>
+          {{else}}
+            <p
+              style='font-size: 30px; color: #00FF1B; padding: 0; margin: 0; font-weight: bold;'
+            >
+              {{name}}{{#if back_title}}, {{back_title}}{{/if}}
+            </p>
+          {{/if}}
+
+          <p
+            style='font-size: 30px; color: #00FF1B; padding: 0; margin: 0; font-weight: bold;'
+          >
+            {{nia}}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class='page' id='page-2'>
+      <div class='content'>
+      </div>
+    </div>
+  </body>
+
+</html>
