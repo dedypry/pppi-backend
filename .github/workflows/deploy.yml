@@ -29,3 +29,4 @@ jobs:
             pnpm install
             pnpm knex migrate:latest
             pnpm build
+            pm2 reload pppi-backend 
