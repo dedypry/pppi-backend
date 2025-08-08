@@ -9,11 +9,7 @@ import { ResponseInterceptor } from 'interceptors/response.interceptors';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://admin.dpn-pppi.org/',
-      'https://dpn-pppi.org/',
-    ],
+    origin: '*',
   });
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
