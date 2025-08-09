@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Injectable } from '@nestjs/common';
-import BannerCreateDto, { BannerDeleteDto } from './dto/create.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import BannerCreateDto, {
+  BannerDeleteDto,
+  BannerUpdateStatusDto,
+} from './dto/create.dto';
 import { BannerModel } from 'models/Banner.model';
 import {
   destroyFile,
@@ -10,7 +13,9 @@ import {
 @Injectable()
 export class BannersService {
   async list() {
-    const banners = await BannerModel.query();
+    const banners = await BannerModel.query()
+      .withGraphFetched('file')
+      .orderBy('id', 'DESC');
 
     return banners;
   }
@@ -28,6 +33,20 @@ export class BannersService {
     }
 
     return 'Banner benrhasil di simpan';
+  }
+
+  async updateStatus(id: number, body: BannerUpdateStatusDto) {
+    const banner = await BannerModel.query().findById(id);
+
+    if (!banner) throw new NotFoundException();
+
+    console.log('B', body);
+
+    await banner.$query().update({
+      is_active: body?.status,
+    });
+
+    return 'Status banner berhasil di update';
   }
 
   async destroy(body: BannerDeleteDto) {

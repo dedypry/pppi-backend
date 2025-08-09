@@ -1,6 +1,18 @@
-import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { BannersService } from './banners.service';
-import BannerCreateDto, { BannerDeleteDto } from './dto/create.dto';
+import BannerCreateDto, {
+  BannerDeleteDto,
+  BannerUpdateStatusDto,
+} from './dto/create.dto';
 import { AuthGuard } from 'guard/auth.guard';
 
 @Controller('banners')
@@ -16,6 +28,11 @@ export class BannersController {
   @Post()
   create(@Body() body: BannerCreateDto) {
     return this.bannersService.create(body);
+  }
+
+  @Patch(':id')
+  updateStatus(@Param('id') id: number, @Body() body: BannerUpdateStatusDto) {
+    return this.bannersService.updateStatus(id, body);
   }
 
   @Delete()
