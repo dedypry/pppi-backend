@@ -9,4 +9,5 @@ export class FileModel extends Model {
   extension!: string;
   mime_type!: string;
   parent_id?: number;
+  table?: string;
 }

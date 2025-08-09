@@ -1,6 +1,10 @@
-import { IsString } from 'class-validator';
+import { IsArray } from 'class-validator';
 
+export class BannerDeleteDto {
+  @IsArray()
+  ids: number[];
+}
 export default class BannerCreateDto {
-  @IsString()
-  url!: string;
+  @IsArray()
+  urls!: string[];
 }

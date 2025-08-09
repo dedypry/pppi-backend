@@ -5,5 +5,6 @@ import { Model } from '.';
 export class BlogCategoriesModel extends Model {
   name: string;
   icon?: string;
+  description?: string;
   is_active: boolean;
 }

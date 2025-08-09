@@ -1,31 +1,46 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { Injectable } from '@nestjs/common';
-import BannerCreateDto from './dto/create.dto';
+import BannerCreateDto, { BannerDeleteDto } from './dto/create.dto';
 import { BannerModel } from 'models/Banner.model';
-import { FileModel } from 'models/File.model';
-import { PaginationDto } from 'utils/dto/pagination.dto';
+import {
+  destroyFile,
+  setFileParent,
+} from 'utils/services/file-gallery.service';
 
 @Injectable()
 export class BannersService {
-  async list(query: PaginationDto) {
-    const banners = await BannerModel.query().page(query.page, query.pageSize);
+  async list() {
+    const banners = await BannerModel.query();
 
     return banners;
   }
 
   async create(body: BannerCreateDto) {
-    const banner = await BannerModel.query().insert({
-      url: body.url,
-      is_active: true,
-    });
+    const banners = await BannerModel.query().insert(
+      body.urls.map((e) => ({
+        url: e,
+        is_active: true,
+      })),
+    );
 
-    const file = await FileModel.query().findOne('url', banner.url);
-
-    if (file) {
-      await file.$query().update({
-        parent_id: banner.id,
-      });
+    for (const item of banners) {
+      setFileParent(item.url, item);
     }
 
     return 'Banner benrhasil di simpan';
+  }
+
+  async destroy(body: BannerDeleteDto) {
+    const banners = await BannerModel.query().whereIn('id', body.ids);
+    const urls: string[] = [];
+    for (const banner of banners) {
+      urls.push(banner.url);
+      await banner.$query().delete();
+    }
+
+    console.log('URL', urls);
+    destroyFile({ urls });
+
+    return 'Banner berhasil di hapus';
   }
 }

@@ -1,17 +1,29 @@
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 
+export enum BlogStatus {
+  PUBLISH = 'publish',
+  DRAFT = 'draft',
+  REJECT = 'rejected',
+  SUBMISSION = 'submission',
+}
+export class BlogUpdateStatusDto {
+  @IsEnum(BlogStatus, {
+    message: 'Status must be one of: publish, draft, reject, submission',
+  })
+  status: BlogStatus;
+}
 export default class BlogCreateDto {
   @IsOptional()
   @IsNumber()
   id?: number;
 
-  @IsNumber()
   @IsNotEmpty()
   category_id: number;
 
@@ -29,9 +41,6 @@ export default class BlogCreateDto {
 
   @IsArray()
   tags: string[];
-
-  @IsString()
-  publish_at?: string;
 
   @IsOptional()
   @IsString()
