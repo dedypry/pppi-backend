@@ -16,7 +16,6 @@ import BannerCreateDto, {
 import { AuthGuard } from 'guard/auth.guard';
 
 @Controller('banners')
-@UseGuards(AuthGuard)
 export class BannersController {
   constructor(private readonly bannersService: BannersService) {}
 
@@ -26,16 +25,19 @@ export class BannersController {
   }
 
   @Post()
+  @UseGuards(AuthGuard)
   create(@Body() body: BannerCreateDto) {
     return this.bannersService.create(body);
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   updateStatus(@Param('id') id: number, @Body() body: BannerUpdateStatusDto) {
     return this.bannersService.updateStatus(id, body);
   }
 
   @Delete()
+  @UseGuards(AuthGuard)
   destroy(@Body() body: BannerDeleteDto) {
     return this.bannersService.destroy(body);
   }

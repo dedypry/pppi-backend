@@ -1,7 +1,8 @@
-import { BelongsToOne, Table } from 'decorators/objections';
+import { BelongsToOne, HasMany, Table } from 'decorators/objections';
 import { Model } from '.';
 import { BlogCategoriesModel } from './BlogCategories.model';
 import { UserModel } from './User.model';
+import { BlogCommentsModel } from './BlogComments.model';
 
 @Table('blogs')
 export class BlogModel extends Model {
@@ -30,4 +31,10 @@ export class BlogModel extends Model {
     to: 'users.id',
   })
   writer?: UserModel;
+
+  @HasMany(() => BlogCommentsModel, {
+    from: 'blogs.id',
+    to: 'blog_comments.blog_id',
+  })
+  comments?: BlogCommentsModel[];
 }

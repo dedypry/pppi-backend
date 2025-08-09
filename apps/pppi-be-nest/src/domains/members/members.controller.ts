@@ -20,7 +20,6 @@ import { Response } from 'express';
 import { getHtmlContent } from '../../services/html-contect';
 
 @Controller('members')
-@UseGuards(AuthGuard)
 export class MembersController {
   constructor(
     private readonly membersService: MembersService,
@@ -28,11 +27,13 @@ export class MembersController {
   ) {}
 
   @Get()
+  @UseGuards(AuthGuard)
   list(@Query() query: PaginationDto) {
     return this.membersService.list(query);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   detail(@Param('id') id: number) {
     return this.membersService.detail(id);
   }
@@ -43,6 +44,7 @@ export class MembersController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard)
   approved(
     @Param('id') id: number,
     @Body() body: MemberApprovedDto,
@@ -52,6 +54,7 @@ export class MembersController {
   }
 
   @Get('download/:id')
+  @UseGuards(AuthGuard)
   async downloadPDF(@Res() res: Response, @Param('id') id: number) {
     const user = await this.membersService.detail(id);
     console.log('USER', user);

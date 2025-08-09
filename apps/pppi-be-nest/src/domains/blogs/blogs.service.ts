@@ -79,10 +79,10 @@ export class BlogsService {
       .page(query.page, query.pageSize);
   }
 
-  async detailBlogs(id: number) {
+  async detailBlogs(slug: string) {
     const blog = await BlogModel.query()
-      .withGraphFetched('[category, writer]')
-      .findById(id);
+      .withGraphFetched('[category, writer,comments]')
+      .findOne('slug', slug);
 
     if (!blog) throw new NotFoundException();
 

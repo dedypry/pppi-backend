@@ -52,9 +52,9 @@ export class BlogsController {
     return this.blogsService.listCategory(query);
   }
 
-  @Get(':id')
-  blogDetail(@Param('id') id: number) {
-    return this.blogsService.detailBlogs(id);
+  @Get(':slug')
+  blogDetail(@Param('slug') slug: string) {
+    return this.blogsService.detailBlogs(slug);
   }
 
   @Post('categories')
