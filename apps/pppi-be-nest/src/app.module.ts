@@ -8,9 +8,10 @@ import { MembersModule } from './domains/members/members.module';
 import { BlogsModule } from './domains/blogs/blogs.module';
 import { UsersModule } from './domains/users/users.module';
 import { ProfileModule } from './domains/profile/profile.module';
+import { SchedulersModule } from './domains/schedulers/schedulers.module';
 
 @Module({
-  imports: [AuthModule, BannersModule, AreaModule, RolesModule, MembersModule, BlogsModule, UsersModule, ProfileModule],
+  imports: [AuthModule, BannersModule, AreaModule, RolesModule, MembersModule, BlogsModule, UsersModule, ProfileModule, SchedulersModule],
   controllers: [AppController],
 })
 export class AppModule {}
