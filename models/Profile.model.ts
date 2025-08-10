@@ -9,7 +9,7 @@ export class ProfileModel extends Model {
   user_id?: number;
   nik?: string;
   place_birth?: string;
-  date_birth?: Date;
+  date_birth?: string;
   gender?: string;
   citizenship?: string;
   address?: string;
@@ -25,6 +25,7 @@ export class ProfileModel extends Model {
   is_member_payment?: boolean;
   member_payment_file?: string;
   reason_reject?: string;
+  photo?: string;
 
   @BelongsToOne(() => ProvinceModel, {
     from: 'profiles.province_id',

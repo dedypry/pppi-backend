@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MemberCreateDto } from './dto/create.dto';
-import { ProvinceModel } from 'models/Province.model';
-import { CityModel } from 'models/Citie.model';
 import { UserModel } from 'models/User.model';
 import * as dayjs from 'dayjs';
 import { hashPassword } from 'utils/helpers/bcrypt';
@@ -10,14 +8,7 @@ import { RoleModel } from 'models/Role.model';
 import MemberApprovedDto from './dto/approved.dto';
 import { fn } from 'objection';
 import { FileModel } from 'models/File.model';
-
-interface IGenNia {
-  provinceId: number;
-  cityId: number;
-  joinYear?: number;
-  sort?: number;
-  dateBirth: string;
-}
+import { generateNia } from 'utils/services/user.service';
 
 @Injectable()
 export class MembersService {
@@ -38,7 +29,7 @@ export class MembersService {
   }
 
   async create(body: MemberCreateDto) {
-    const { nia, sort, year } = await this.generateNia({
+    const { nia, sort, year } = await generateNia({
       provinceId: body.province_id,
       cityId: body.city_id,
       dateBirth: body.date_birth,
@@ -97,29 +88,6 @@ export class MembersService {
       });
 
     return `Member berhasil ${body.id ? 'diperbaharui' : 'ditambahkan'}`;
-  }
-
-  async generateNia(data: IGenNia) {
-    const province = await ProvinceModel.query().findById(data.provinceId);
-    const city = await CityModel.query().findById(data.cityId);
-    const { max }: any = await UserModel.query().max('sort').first();
-    const sortNumber = String(data?.sort || max + 1 || 1).padStart(4, '0');
-    const year = data.joinYear || dayjs().format('YY');
-    const birtDate = dayjs(data.dateBirth).format('YY');
-
-    const cityCode =
-      (city?.code || 0) < 10 ? String(city?.code).padStart(2, '0') : city?.code;
-
-    const provinceCode =
-      (province?.code || 0) < 10
-        ? String(province?.code).padStart(2, '0')
-        : province?.code;
-
-    return {
-      nia: `${year}.${provinceCode}.${cityCode}.${birtDate}.${sortNumber}`,
-      sort: Number(sortNumber),
-      year,
-    };
   }
 
   async updateApproved(body: MemberApprovedDto, id: number, userId: number) {
