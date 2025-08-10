@@ -3,7 +3,7 @@ import { Model as BaseModel } from 'objection';
 import knex from 'knex';
 import knexConfig from 'knexfile';
 
-const knexInstance = knex(knexConfig);
+export const knexInstance = knex(knexConfig);
 
 BaseModel.knex(knexInstance);
 

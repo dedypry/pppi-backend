@@ -1,4 +1,11 @@
+import { knexInstance } from 'models';
 import slugify from 'slugify';
+
+interface IGenerateSlug {
+  slug: string;
+  table: string;
+  key: string;
+}
 
 export function generateRandomString(length: number): string {
   const characters =
@@ -23,4 +30,23 @@ export function Slug(slug: string) {
     locale: 'vi',
     trim: true,
   });
+}
+
+export async function createSlugModel({
+  slug,
+  table,
+  key,
+}: IGenerateSlug): Promise<string> {
+  const sl = Slug(slug);
+  const res = await knexInstance.table(table).where(key, sl).first();
+
+  if (res) {
+    slug = await createSlugModel({
+      slug: `${slug}-${generateRandomString(4)}`,
+      table,
+      key,
+    });
+  }
+
+  return slug;
 }
