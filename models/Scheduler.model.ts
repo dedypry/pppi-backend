@@ -14,6 +14,9 @@ export class SchedulerModel extends Model {
   end_at: string;
   description?: string;
   user_id: number;
+  price: number;
+  discount: number;
+  is_show_web: boolean;
 
   @Modifier
   list(query: AnyQueryBuilder) {

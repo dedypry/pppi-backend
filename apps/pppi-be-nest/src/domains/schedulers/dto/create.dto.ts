@@ -27,4 +27,13 @@ export class ScheduleCreateDto {
   @IsOptional()
   @IsString()
   description: string;
+
+  @IsOptional()
+  price?: number;
+
+  @IsOptional()
+  discount?: number;
+
+  @IsOptional()
+  is_show_web?: boolean;
 }

@@ -30,6 +30,9 @@ export class SchedulersService {
       end_at: body.end_at,
       description: body.description,
       user_id: userId,
+      price: body.price,
+      is_show_web: body.is_show_web,
+      discount: body.discount,
     });
 
     if (shedule.cover) {
