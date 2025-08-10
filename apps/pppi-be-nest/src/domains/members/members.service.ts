@@ -29,21 +29,12 @@ export class MembersService {
   }
 
   async create(body: MemberCreateDto) {
-    const { nia, sort, year } = await generateNia({
-      provinceId: body.province_id,
-      cityId: body.city_id,
-      dateBirth: body.date_birth,
-      sort: body?.sort,
-      joinYear: body.join_year,
-    });
-
     const user: any = await UserModel.query().upsertGraphAndFetch({
       id: body.id,
       email: body.email,
       name: body.name,
-      sort: sort as any,
-      nia,
-      join_year: year as string,
+      sort: body?.sort,
+      join_year: body.join_year,
       ...(!body?.id && {
         status: 'submission',
         is_active: false,
@@ -95,6 +86,14 @@ export class MembersService {
 
     if (!member) throw new NotFoundException();
 
+    const { nia } = await generateNia({
+      provinceId: member.profile.province_id!,
+      cityId: member.profile.city_id!,
+      dateBirth: member.profile.date_birth!,
+      sort: member.sort,
+      joinYear: Number(member.join_year),
+    });
+
     const status = body.approved ? 'approved' : 'rejected';
 
     await member.$query().update({
@@ -104,6 +103,7 @@ export class MembersService {
             approved_at: fn.now(),
             approved_by: userId,
             is_active: true,
+            nia,
           }
         : {
             rejected_note: body?.rejected_note,
