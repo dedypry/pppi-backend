@@ -38,4 +38,13 @@ export class BlogCommentGateway
       action: 'refresh',
     });
   }
+
+  @SubscribeMessage('delete-comment')
+  async handleDeleteEvent(@MessageBody('id') id: number) {
+    const result = await this.blogCommentService.destroy(id);
+
+    this.server.emit(`comment-${result?.slug}`, {
+      action: 'refresh',
+    });
+  }
 }

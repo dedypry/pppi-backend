@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create.dto';
 import { BlogCommentsModel } from 'models/BlogComments.model';
 import { BlogModel } from 'models/Blog.model';
@@ -19,6 +19,22 @@ export class BlogCommentService {
     const blog = await BlogModel.query()
       .select('slug')
       .findById(comment.blog_id);
+
+    return blog!;
+  }
+
+  async destroy(id: number): Promise<BlogModel> {
+    const comment = await BlogCommentsModel.query().findById(id);
+
+    if (!comment) throw new NotFoundException();
+
+    await BlogCommentsModel.query().where('parent_id', comment.id).delete();
+
+    const blog = await BlogModel.query()
+      .select('slug')
+      .findById(comment.blog_id);
+
+    await comment.$query().delete();
 
     return blog!;
   }
