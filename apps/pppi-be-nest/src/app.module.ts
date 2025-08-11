@@ -10,9 +10,22 @@ import { UsersModule } from './domains/users/users.module';
 import { ProfileModule } from './domains/profile/profile.module';
 import { SchedulersModule } from './domains/schedulers/schedulers.module';
 import { MessagesModule } from './domains/messages/messages.module';
+import { BlogCommentsModule } from './domains/blog-comments/blog-comments.module';
 
 @Module({
-  imports: [AuthModule, BannersModule, AreaModule, RolesModule, MembersModule, BlogsModule, UsersModule, ProfileModule, SchedulersModule, MessagesModule],
+  imports: [
+    AuthModule,
+    BannersModule,
+    AreaModule,
+    RolesModule,
+    MembersModule,
+    BlogsModule,
+    UsersModule,
+    ProfileModule,
+    SchedulersModule,
+    MessagesModule,
+    BlogCommentsModule,
+  ],
   controllers: [AppController],
 })
 export class AppModule {}

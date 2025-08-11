@@ -1,5 +1,6 @@
-import { Table } from 'decorators/objections';
+import { HasMany, Modifier, Table } from 'decorators/objections';
 import { Model } from '.';
+import { AnyQueryBuilder } from 'objection';
 
 @Table('blog_comments')
 export class BlogCommentsModel extends Model {
@@ -10,4 +11,16 @@ export class BlogCommentsModel extends Model {
   name?: string;
   email?: string;
   website?: string;
+  avatar?: string;
+
+  @Modifier
+  child(query: AnyQueryBuilder) {
+    query.withGraphFetched('children(child)').orderBy('created_at', 'desc');
+  }
+
+  @HasMany(() => BlogCommentsModel, {
+    from: 'blog_comments.id',
+    to: 'blog_comments.parent_id',
+  })
+  children: BlogCommentsModel[];
 }

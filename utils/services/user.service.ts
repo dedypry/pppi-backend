@@ -53,7 +53,7 @@ export async function generateNia(data: IGenNia) {
 }
 
 async function generateSimpleNia(data: IGenNiaSimple) {
-  const sortNumber = data.sortNumber.padStart(4, '0');
+  const sortNumber = String(data.sortNumber).padStart(4, '0');
   let nia = `${data.year}.${data.provinceCode}.${data.cityCode}.${data.birtDate}.${sortNumber}`;
 
   const checkNia = await UserModel.query().findOne('nia', nia);
@@ -61,7 +61,7 @@ async function generateSimpleNia(data: IGenNiaSimple) {
   if (checkNia) {
     nia = await generateSimpleNia({
       ...data,
-      sortNumber: String(Number(data.sortNumber) + 1),
+      sortNumber: Number(data.sortNumber) + 1,
     });
   }
 
