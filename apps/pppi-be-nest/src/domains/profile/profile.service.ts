@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { UserModel } from 'models/User.model';
 import {
+  UpdateBioDto,
   UpdatePasswordeDto,
   UpdatePhotoProfileDto,
   UpdateProfileDto,
@@ -117,5 +118,17 @@ export class ProfileService {
     });
 
     return 'Password Berhasil di ubah';
+  }
+
+  async updateBio(body: UpdateBioDto, userId: number) {
+    const user = await UserModel.query().findById(userId);
+
+    if (!user) throw new NotFoundException();
+
+    await user.$query().update({
+      bio: body.bio,
+    });
+
+    return 'Bio berhasil di ubah';
   }
 }

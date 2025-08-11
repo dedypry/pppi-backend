@@ -74,14 +74,14 @@ export class BlogsService {
 
   async listBlogs(query: PaginationDto) {
     return await BlogModel.query()
-      .withGraphFetched('[category, writer]')
+      .withGraphFetched('[category, writer(list)]')
       .orderBy('created_at', 'DESC')
       .page(query.page, query.pageSize);
   }
 
   async detailBlogs(slug: string) {
     const blog = await BlogModel.query()
-      .withGraphFetched('[category, writer,comments]')
+      .withGraphFetched('[category, writer(listBlog)]')
       .findOne('slug', slug);
 
     if (!blog) throw new NotFoundException();

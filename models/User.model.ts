@@ -28,6 +28,7 @@ export class UserModel extends Model {
   rejected_by?: number;
   deleted_by?: number;
   rejected_note?: string;
+  bio?: string;
 
   @Modifier
   list(query: AnyQueryBuilder) {
@@ -51,7 +52,18 @@ export class UserModel extends Model {
       'rejected_note',
       'sort',
       'created_at',
+      'bio',
     );
+  }
+
+  @Modifier
+  listBlog(query: AnyQueryBuilder) {
+    query
+      .select('users.id', 'name', 'email', 'bio')
+      .withGraphFetched('profile(listProfile)')
+      .modifiers({
+        listProfile: (query: AnyQueryBuilder) => query.select('photo'),
+      });
   }
 
   @ManyToMany(() => RoleModel, {

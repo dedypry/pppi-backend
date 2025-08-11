@@ -2,6 +2,7 @@ import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { AuthGuard } from 'guard/auth.guard';
 import {
+  UpdateBioDto,
   UpdatePasswordeDto,
   UpdatePhotoProfileDto,
   UpdateProfileDto,
@@ -30,5 +31,9 @@ export class ProfileController {
   @Patch('/password')
   updatePassword(@Body() body: UpdatePasswordeDto, @Req() req: any) {
     return this.profileService.updatePassword(body, req['user']['id']);
+  }
+  @Patch('/bio')
+  updateBio(@Body() body: UpdateBioDto, @Req() req: any) {
+    return this.profileService.updateBio(body, req['user']['id']);
   }
 }

@@ -68,3 +68,7 @@ export class UpdatePasswordeDto {
   @IsString()
   confirm_password: string;
 }
+export class UpdateBioDto {
+  @IsString()
+  bio: string;
+}
