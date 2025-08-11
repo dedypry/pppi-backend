@@ -21,7 +21,7 @@ export class ResponseInterceptor implements NestInterceptor {
           const pageSize = query?.pageSize || 10;
 
           const perPage = +pageSize || 10;
-          const currentPage = page ? +page - 1 : 1;
+          const currentPage = page ? +page : 1;
           const lastPage = Math.ceil(data.total / perPage);
 
           return {
