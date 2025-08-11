@@ -5,28 +5,35 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { UniqueViolationError } from 'objection';
 
-@Catch(HttpException)
+@Catch(HttpException, UniqueViolationError)
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception.getStatus();
 
-    let res: any = null;
+    console.error(exception);
+
+    if (exception instanceof UniqueViolationError) {
+      return response.status(400).json({
+        message: `${exception.columns
+          .map((e) => e)
+          .join(', ')
+          .toUpperCase()} Sudah Terdaftar`,
+        detail: exception.constraint,
+      });
+    }
+
     if (exception instanceof HttpException) {
-      res = exception.getResponse();
+      return response
+        .status(exception.getStatus())
+        .json(exception.getResponse());
     }
 
-    if (!res) {
-      res = {
-        message: 'Internal Server Error',
-      };
-    }
-
-    response.status(status).json({
-      message: res?.message,
-      errors: res?.errors,
+    // fallback untuk error lain
+    return response.status(500).json({
+      message: 'Internal Server Error',
     });
   }
 }
