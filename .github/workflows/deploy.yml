@@ -29,4 +29,6 @@ jobs:
             pnpm install
             pnpm knex migrate:latest
             pnpm build
+            pnpm build websocket
             pm2 reload pppi-backend 
+            pm2 reload pppi-socket 
