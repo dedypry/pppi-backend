@@ -33,7 +33,7 @@ export class MembersService {
       id: body.id,
       email: body.email,
       name: body.name,
-      sort: body?.sort,
+      sort: body?.sort || null,
       join_year: body.join_year,
       ...(!body?.id && {
         status: 'submission',
@@ -82,7 +82,9 @@ export class MembersService {
   }
 
   async updateApproved(body: MemberApprovedDto, id: number, userId: number) {
-    const member = await UserModel.query().findById(id);
+    const member = await UserModel.query()
+      .withGraphFetched('profile')
+      .findById(id);
 
     if (!member) throw new NotFoundException();
 
