@@ -33,7 +33,13 @@ export class AreaService {
         if (query.q) {
           builder
             .whereILike('name', `%${query.q}%`)
-            .orWhereILike('code', `%${query.q}%`);
+            .orWhereILike('code', `%${query.q}%`)
+            .orWhereExists(
+              CityModel.relatedQuery('province').whereILike(
+                'province.name',
+                `%${query.q}%`,
+              ),
+            );
         }
       });
     if (query?.page) {
@@ -67,7 +73,18 @@ export class AreaService {
         if (query.q) {
           builder
             .whereILike('name', `%${query.q}%`)
-            .orWhereILike('code', `%${query.q}%`);
+            .orWhereILike('code', `%${query.q}%`)
+            .orWhereExists(
+              DistrictModel.relatedQuery('city').whereILike(
+                'city.name',
+                `%${query.q}%`,
+              ),
+            )
+            .orWhereExists(
+              DistrictModel.relatedQuery('city')
+                .joinRelated('province')
+                .whereILike('province.name', `%${query.q}%`),
+            );
         }
       });
     if (query?.page) {
