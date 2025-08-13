@@ -17,6 +17,15 @@
   "monorepo": true,
   "root": "apps/pppi-be-nest",
   "projects": {
+    "background-jobs": {
+      "type": "application",
+      "root": "apps/background-jobs",
+      "entryFile": "main",
+      "sourceRoot": "apps/background-jobs/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/background-jobs/tsconfig.app.json"
+      }
+    },
     "file-upload": {
       "type": "application",
       "root": "apps/file-upload",

@@ -8,7 +8,9 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { MembersService } from './members.service';
 import { MemberCreateDto } from './dto/create.dto';
@@ -18,17 +20,21 @@ import { AuthGuard } from 'guard/auth.guard';
 import { PdfService } from 'utils/services/pdf.service';
 import { Response } from 'express';
 import { getHtmlContent } from '../../services/html-contect';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ExcelService } from 'utils/services/excel.service';
 
 @Controller('members')
 export class MembersController {
   constructor(
     private readonly membersService: MembersService,
     private readonly pdfService: PdfService,
+    private readonly excelService: ExcelService,
   ) {}
 
   @Get()
   @UseGuards(AuthGuard)
   list(@Query() query: PaginationDto) {
+    query.page = query.page - 1;
     return this.membersService.list(query);
   }
 
@@ -69,5 +75,15 @@ export class MembersController {
       name: 'pdf of',
       landscape: true,
     });
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFileExcel(@UploadedFile() file: Express.Multer.File) {
+    if (!file) return 'No File';
+
+    const result = this.excelService.parseExcel(file.buffer);
+
+    return this.membersService.uploadBulkMemberFromExcel(result[0].rows as any);
   }
 }

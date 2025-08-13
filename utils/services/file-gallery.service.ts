@@ -3,6 +3,7 @@ import axios from 'axios';
 import 'dotenv/config';
 import { Model } from 'models';
 import { FileModel } from 'models/File.model';
+import * as FormData from 'form-data';
 const http = axios.create({
   baseURL: process.env.API_GALERRY,
 });
@@ -11,6 +12,27 @@ interface IDeleteFile {
   url?: string;
   urls?: string[];
 }
+
+export async function uploadFile(file: Buffer, folder: string = 'general') {
+  const formData = new FormData();
+
+  formData.append('file', file, { filename: 'profile.png' });
+
+  try {
+    const { data } = await http.post(`/?folder=${folder}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return data;
+  } catch (error) {
+    console.error(error?.response?.data);
+
+    return null;
+  }
+}
+
 export async function setFileParent(url: string, model: Model) {
   const file = await FileModel.query().findOne('url', url);
 

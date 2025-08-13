@@ -74,7 +74,7 @@ export class UserModel extends Model {
       to: 'role_user.role_id',
     },
   })
-  roles!: RoleModel[];
+  roles: RoleModel[];
 
   @HasOne(() => ProfileModel, {
     from: 'users.id',

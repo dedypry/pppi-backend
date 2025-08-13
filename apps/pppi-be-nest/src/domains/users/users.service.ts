@@ -6,6 +6,7 @@ import {
 import { UserModel } from 'models/User.model';
 import CheckEmailDto from './dto/check-mail.dto';
 import { fn } from 'objection';
+import { ProfileModel } from 'models/Profile.model';
 
 @Injectable()
 export class UsersService {
@@ -28,9 +29,14 @@ export class UsersService {
 
     if (!user) throw new NotFoundException();
 
-    await user.$query().update({
-      deleted_at: fn.now(),
-      deleted_by: userId,
-    });
+    await ProfileModel.query().where('user_id', user.id).delete();
+
+    await user.$relatedQuery('roles').unrelate();
+
+    await user.$query().delete();
+
+    console.log(userId);
+
+    return 'User berhasil di hapus';
   }
 }

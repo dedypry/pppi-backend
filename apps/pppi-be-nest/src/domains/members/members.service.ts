@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MemberCreateDto } from './dto/create.dto';
 import { UserModel } from 'models/User.model';
@@ -9,13 +10,16 @@ import MemberApprovedDto from './dto/approved.dto';
 import { fn } from 'objection';
 import { FileModel } from 'models/File.model';
 import { generateNia } from 'utils/services/user.service';
+import { IExportMember } from 'utils/interfaces/member.interface';
+import { parseTempatTanggal } from 'utils/helpers/global';
+import { customFormat, getYear, toIsoString } from 'utils/helpers/date-format';
+import { BackgroundJobModel } from 'models/BackgroundJob.model';
 
 @Injectable()
 export class MembersService {
   async list(query: PaginationDto) {
     return await UserModel.query()
       .modify('list')
-      .whereNull('deleted_at')
       .withGraphFetched('[profile.[province, city, district] ]')
       .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
       .page(query.page, query.pageSize);
@@ -115,5 +119,73 @@ export class MembersService {
     });
 
     return 'Member berhasil di update';
+  }
+
+  async uploadBulkMemberFromExcel(data: IExportMember[]) {
+    //drive.google.com/open?id=1r0vGnN38H_hGidApavBqa1Yboo1IMHGQ
+
+    for (const item of data) {
+      const parseTTL = parseTempatTanggal(item.tempattanggal_lahir);
+
+      const paymentFile =
+        item.jika_bersedia_dapat_dikirimkan_melalui_bri_kcp_jatinegara_norek_120601000397303_an_perkumpulan_perawat_pembaharuan_indonesia;
+
+      const user = {
+        front_title: '',
+        back_title: '',
+        join_year: getYear(item.timestamp),
+        name: item.nama_lengkap_tanpa_gelar_gunakan_huruf_kapital_contoh_ani_roro_dewi,
+        email: item.email_aktif,
+        password: hashPassword(customFormat(parseTTL.tanggal)),
+        is_active: false,
+        status: 'submission',
+      } as any;
+
+      const profile = {
+        gender: item.jenis_kelamin === 'Laki-laki' ? 'male' : 'female',
+        date_birth: toIsoString(parseTTL.tanggal),
+        place_birth: parseTTL.tempat!,
+        citizenship: (item.kewarganegaraan || 'wni').toLowerCase(),
+        phone: item.no_telpwa_aktif,
+        last_education_nursing: item.pendidikan_terakhir_keperawatan,
+        last_education: item.pendidikan_terakhir_selain_keperawatan_formal,
+        is_member_payment:
+          item.kontribusi_keanggotaan_sebesar_rp_100000_sebagai_anggota_baru ===
+          'Bersedia',
+        member_payment_file: this.converLink(paymentFile),
+        workplace: item.instansiinstitusi_tempat_bekerja_saat_ini,
+        hope_in: item.harapan_apa_yang_dapat_diberikan_oleh_organisasi_pppip3i,
+        contribution:
+          item.kontribusi_yang_diharapkan_dapat_diberikan_untuk_organisasi_pppip3i,
+        nik: item.nomor_induk_kependudukan,
+        reason_reject:
+          item.alasan_tidak_bersedia_berkontribusi_sebagai_anggota_baru || '',
+        address: item.alamat_tempat_tinggal_lengkap,
+        photo: this.converLink(
+          item.foto_terbaru_ukuran_4x6_dengan_background_warna_merah_472_x_709_px,
+        ),
+      };
+
+      await BackgroundJobModel.query().insert({
+        status: 'pending',
+        data: {
+          user,
+          profile,
+        },
+        error: null,
+      });
+    }
+
+    // return parseTTL
+    // const file = await getImageFromUrl(url);
+    return 'Job Berhasil di buat';
+  }
+
+  converLink(url: string) {
+    if (!url) return null;
+    const match = url.match(/id=([^&]+)/);
+    const id = match ? match[1] : null;
+
+    return `https://drive.google.com/file/d/${id}/view`;
   }
 }
