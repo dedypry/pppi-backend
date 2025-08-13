@@ -16,36 +16,57 @@ export class BackgroundJobsService {
   @Cron(CronExpression.EVERY_5_SECONDS)
   async handleCreateUser() {
     const cron = await BackgroundJobModel.query()
-      .where('status', 'pending')
+      .where('status', 'success')
       .page(0, 20);
 
     for (const item of cron.results) {
       const body = item.data;
+      const user = await UserModel.query()
+        .where('email', body.user.email)
+        .joinRelated('profile')
+        .whereNull('profile.photo')
+        .first();
 
-      const ttl = toIsoString(body.profile.date_birth);
-
-      console.log('TTL', toIsoString(body.profile.date_birth));
-
-      if (ttl) {
-        await this.createUserAuto(
-          body.user,
-          {
-            ...body.profile,
-            date_birth: toIsoString(body.profile.date_birth),
-          },
-          item.id,
+      // console.log(user);
+      if (user) {
+        const photo = await getImageFromUrl(body.profile.photo);
+        const member_payment_file = await getImageFromUrl(
+          body.profile.member_payment_file,
+          'payment_files',
         );
-      } else {
-        await BackgroundJobModel.query()
-          .findById(item.id)
-          .update({
-            status: 'error',
-            error: {
-              id: item.id,
-              data: body.profile.date_birth,
-            },
-          });
+
+        await ProfileModel.query().where('user_id', user.id).update({
+          photo,
+          member_payment_file,
+        });
+        console.log('SUCCESS');
       }
+      // const body = item.data;
+
+      // const ttl = toIsoString(body.profile.date_birth);
+
+      // console.log('TTL', toIsoString(body.profile.date_birth));
+
+      // if (ttl) {
+      //   await this.createUserAuto(
+      //     body.user,
+      //     {
+      //       ...body.profile,
+      //       date_birth: toIsoString(body.profile.date_birth),
+      //     },
+      //     item.id,
+      //   );
+      // } else {
+      //   await BackgroundJobModel.query()
+      //     .findById(item.id)
+      //     .update({
+      //       status: 'error',
+      //       error: {
+      //         id: item.id,
+      //         data: body.profile.date_birth,
+      //       },
+      //     });
+      // }
     }
     console.log('JALAN', cron.total);
   }

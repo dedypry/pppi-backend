@@ -30,5 +30,7 @@ jobs:
             pnpm knex migrate:latest
             pnpm build
             pnpm build websocket
+            pnpm build background-jobs
             pm2 reload pppi-backend 
             pm2 reload pppi-socket 
+            pm2 reload pppi-background-jobs 
