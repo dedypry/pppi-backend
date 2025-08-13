@@ -27,8 +27,6 @@ export async function generateNia(data: IGenNia) {
   const year = data.joinYear || dayjs().format('YY');
   const birtDate = dayjs(data.dateBirth).format('YY');
 
-  console.log(data, sortNumber);
-
   const cityCode =
     (city?.code || 0) < 10 ? String(city?.code).padStart(2, '0') : city?.code;
 
