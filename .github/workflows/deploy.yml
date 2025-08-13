@@ -33,4 +33,3 @@ jobs:
             pnpm build background-jobs
             pm2 reload pppi-backend 
             pm2 reload pppi-socket 
-            pm2 reload pppi-background-jobs 
