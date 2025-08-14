@@ -34,6 +34,10 @@ export class AreaController {
 
   @Get('districts')
   allDistrict(@Query() query: PaginationDto) {
+    if (query.type == 'merge') {
+      return this.areaService.getAllDistricMerge();
+    }
+
     return this.areaService.getAllDistrict(query);
   }
 

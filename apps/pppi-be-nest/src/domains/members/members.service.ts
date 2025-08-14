@@ -18,6 +18,7 @@ import { parseTempatTanggal } from 'utils/helpers/global';
 import { customFormat, getYear, toIsoString } from 'utils/helpers/date-format';
 import { BackgroundJobModel } from 'models/BackgroundJob.model';
 import { UpdateSettingDto } from './dto/update.dto';
+import { DistrictModel } from 'models/District.model';
 
 @Injectable()
 export class MembersService {
@@ -45,6 +46,7 @@ export class MembersService {
       })
       .withGraphFetched('[profile.[province, city, district] ]')
       .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
+      .orderBy('created_at', 'desc')
       .page(query.page, query.pageSize);
   }
 
@@ -56,6 +58,16 @@ export class MembersService {
   }
 
   async create(body: MemberCreateDto) {
+    const regional: any = await DistrictModel.query()
+      .select(
+        'districts.id as district_id',
+        'city.id as city_id',
+        'province.id as province_id',
+      )
+      .findOne('districts.id', body.district_id)
+      .join('cities as city', 'city.id', 'districts.city_id')
+      .join('provinces as province', 'province.id', 'city.province_id');
+
     const user: any = await UserModel.query().upsertGraphAndFetch({
       id: body.id,
       email: body.email,
@@ -78,9 +90,9 @@ export class MembersService {
         gender: body.gender,
         citizenship: body.citizenship.toLocaleLowerCase(),
         address: body.address,
-        province_id: body.province_id,
-        city_id: body.city_id,
-        district_id: body.district_id,
+        province_id: regional.province_id,
+        city_id: regional.city_id,
+        district_id: regional.district_id,
         phone: body.phone,
         last_education_nursing: body.last_education_nursing,
         last_education: body.last_education,

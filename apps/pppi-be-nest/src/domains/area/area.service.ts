@@ -4,6 +4,7 @@ import { DistrictModel } from 'models/District.model';
 import { ProvinceModel } from 'models/Province.model';
 import { PaginationDto } from 'utils/dto/pagination.dto';
 import { UpdateProvinceCodeDto } from './dto/update.dto';
+import { raw } from 'objection';
 
 @Injectable()
 export class AreaService {
@@ -63,6 +64,20 @@ export class AreaService {
     });
 
     return 'Kode berhasil diupdate';
+  }
+
+  async getAllDistricMerge() {
+    const district = await DistrictModel.query()
+      .select(
+        'districts.id',
+        raw(
+          `districts.name || ' | ' || city.name || ' | ' || province.name`,
+        ).as('name'),
+      )
+      .join('cities as city', 'city.id', 'districts.city_id')
+      .join('provinces as province', 'province.id', 'city.province_id');
+
+    return district;
   }
 
   async getAllDistrict(query: PaginationDto) {
