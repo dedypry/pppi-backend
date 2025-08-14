@@ -17,6 +17,7 @@ import { IExportMember } from 'utils/interfaces/member.interface';
 import { parseTempatTanggal } from 'utils/helpers/global';
 import { customFormat, getYear, toIsoString } from 'utils/helpers/date-format';
 import { BackgroundJobModel } from 'models/BackgroundJob.model';
+import { UpdateSettingDto } from './dto/update.dto';
 
 @Injectable()
 export class MembersService {
@@ -50,7 +51,7 @@ export class MembersService {
   async detail(id: number) {
     return await UserModel.query()
       .modify('list')
-      .withGraphFetched('[profile.[province, city, district] ]')
+      .withGraphFetched('[profile.[province, city, district], roles ]')
       .findById(id);
   }
 
@@ -152,6 +153,25 @@ export class MembersService {
             rejected_by: userId,
           }),
     });
+
+    return 'Member berhasil di update';
+  }
+
+  async memberSetting(body: UpdateSettingDto, id: number) {
+    const user = await UserModel.query().findById(id);
+
+    if (!user) throw new NotFoundException();
+
+    await user.$relatedQuery('roles').unrelate();
+    for (const roleId of body.roleId) {
+      await user.$relatedQuery('roles').relate(roleId);
+    }
+
+    if (body?.password) {
+      await user.$query().update({
+        password: hashPassword(body.password),
+      });
+    }
 
     return 'Member berhasil di update';
   }

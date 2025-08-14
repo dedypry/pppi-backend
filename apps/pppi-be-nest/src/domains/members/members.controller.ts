@@ -22,6 +22,7 @@ import { Response } from 'express';
 import { getHtmlContent } from '../../services/html-contect';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ExcelService } from 'utils/services/excel.service';
+import { UpdateSettingDto } from './dto/update.dto';
 
 @Controller('members')
 export class MembersController {
@@ -57,6 +58,11 @@ export class MembersController {
     @Req() req: any,
   ) {
     return this.membersService.updateApproved(body, id, req['user']['id']);
+  }
+  @Patch('settings/:id')
+  @UseGuards(AuthGuard)
+  memberSetting(@Param('id') id: number, @Body() body: UpdateSettingDto) {
+    return this.membersService.memberSetting(body, id);
   }
 
   @Get('download/:id')

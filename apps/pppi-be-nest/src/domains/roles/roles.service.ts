@@ -13,13 +13,19 @@ import { AnyQueryBuilder } from 'objection';
 @Injectable()
 export class RolesService {
   async list(query: PaginationDto) {
-    return await RoleModel.query()
+    const roles = RoleModel.query()
       .withGraphFetched('users(userLisr)')
-      .page(query.page, query.pageSize)
+
       .modifiers({
         userLisr: (query: AnyQueryBuilder) =>
           query.select('users.id', 'users.name', 'users.email').limit(5),
       });
+
+    if (query.page) {
+      return await roles.page(query.page, query.pageSize);
+    }
+
+    return await roles;
   }
 
   async create(body: RoleCreateDto) {

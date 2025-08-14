@@ -17,6 +17,7 @@ export class RolesController {
 
   @Get()
   list(@Query() query: PaginationDto) {
+    query.page = query.page - 1;
     return this.rolesService.list(query);
   }
 
