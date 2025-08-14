@@ -125,15 +125,17 @@ export class MembersService {
       }
       nia = body.nia;
     } else {
-      const generate = await generateNia({
-        provinceId: member.profile.province_id!,
-        cityId: member.profile.city_id!,
-        dateBirth: member.profile.date_birth!,
-        sort: member.sort,
-        joinYear: Number(member.join_year),
-      });
+      if (body.approved) {
+        const generate = await generateNia({
+          provinceId: member.profile.province_id!,
+          cityId: member.profile.city_id!,
+          dateBirth: member.profile.date_birth!,
+          sort: member.sort,
+          joinYear: Number(member.join_year),
+        });
 
-      nia = generate.nia;
+        nia = generate.nia;
+      }
     }
 
     const status = body.approved ? 'approved' : 'rejected';
