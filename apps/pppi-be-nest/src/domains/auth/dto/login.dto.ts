@@ -7,4 +7,7 @@ export default class LoginDto {
 
   @IsString()
   password!: string;
+
+  @IsString()
+  type!: string;
 }

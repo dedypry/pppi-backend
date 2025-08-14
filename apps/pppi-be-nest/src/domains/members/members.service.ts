@@ -66,7 +66,7 @@ export class MembersService {
         status: 'submission',
         is_active: false,
         is_organization: false,
-        password: hashPassword(dayjs(body.date_birth).format('ddmmYYYY')),
+        password: hashPassword(dayjs(body.date_birth).format('DDMMYYYY')),
       }),
       front_title: body.front_title,
       back_title: body.back_title,
@@ -168,6 +168,7 @@ export class MembersService {
     }
 
     if (body?.password) {
+      console.log('MASUK ganti password');
       await user.$query().update({
         password: hashPassword(body.password),
       });

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotAcceptableException,
   NotFoundException,
@@ -15,11 +16,23 @@ import * as dayjs from 'dayjs';
 @Injectable()
 export class AuthService {
   async login(body: LoginDto) {
-    const user = await UserModel.query().findOne('email', body.email);
+    let user: any = null;
 
-    if (!user) throw new NotFoundException('User Not Found');
+    if (body.type == 'admin') {
+      user = await UserModel.query()
+        .joinRelated('roles')
+        .where('email', body.email)
+        .whereIn('roles.title', ['admin', 'super-admin'])
+        .first();
 
-    const match = comparePassword(body.password, user.password);
+      if (!user) throw new NotFoundException('User Not Found');
+    } else {
+      throw new ForbiddenException();
+    }
+
+    console.log(user);
+    // throw new ForbiddenException();
+    const match = comparePassword(body.password, user?.password);
 
     if (!match) throw new BadRequestException('Password Not Match');
 
