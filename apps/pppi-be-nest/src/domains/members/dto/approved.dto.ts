@@ -7,4 +7,8 @@ export default class MemberApprovedDto {
   @IsOptional()
   @IsString()
   rejected_note?: string;
+
+  @IsOptional()
+  @IsString()
+  nia?: string;
 }

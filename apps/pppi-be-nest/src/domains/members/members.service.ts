@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { MemberCreateDto } from './dto/create.dto';
 import { UserModel } from 'models/User.model';
 import * as dayjs from 'dayjs';
@@ -109,16 +113,28 @@ export class MembersService {
       .findById(id);
 
     if (!member) throw new NotFoundException();
+    let nia = '';
+    if (body.nia) {
+      const checkNia = await UserModel.query().findOne('nia', body.nia);
 
-    const { nia } = await generateNia({
-      provinceId: member.profile.province_id!,
-      cityId: member.profile.city_id!,
-      dateBirth: member.profile.date_birth!,
-      sort: member.sort,
-      joinYear: Number(member.join_year),
-    });
+      if (checkNia) {
+        throw new ForbiddenException(
+          `Nia Sudah Tersedia di user ${checkNia.name}`,
+        );
+      }
+      nia = body.nia;
+    } else {
+      const generate = await generateNia({
+        provinceId: member.profile.province_id!,
+        cityId: member.profile.city_id!,
+        dateBirth: member.profile.date_birth!,
+        sort: member.sort,
+        joinYear: Number(member.join_year),
+      });
 
-    console.log(nia);
+      nia = generate.nia;
+    }
+
     const status = body.approved ? 'approved' : 'rejected';
 
     await member.$query().update({
