@@ -1,4 +1,4 @@
-import { IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
@@ -31,18 +31,15 @@ export class UpdateProfileDto {
   @IsString()
   address: string;
 
-  @Matches(/^\d+$/, {
-    message: 'province_id must be a number or numeric string',
-  })
+  @IsNotEmpty()
   province_id: number;
 
-  @Matches(/^\d+$/, { message: 'city_id must be a number or numeric string' })
+  @IsNotEmpty()
   city_id: number;
 
-  @Matches(/^\d+$/, {
-    message: 'district_id must be a number or numeric string',
-  })
+  @IsNotEmpty()
   district_id: number;
+  
   @IsString()
   phone: string;
 
