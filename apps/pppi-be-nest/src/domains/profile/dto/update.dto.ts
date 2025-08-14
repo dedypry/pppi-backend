@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
@@ -39,7 +39,7 @@ export class UpdateProfileDto {
 
   @IsNotEmpty()
   district_id: number;
-  
+
   @IsString()
   phone: string;
 

@@ -15,6 +15,6 @@ export class PaginationDto {
   q?: string;
 
   status?: string;
-  
+
   type?: string;
 }

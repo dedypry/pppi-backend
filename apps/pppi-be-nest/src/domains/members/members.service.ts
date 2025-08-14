@@ -32,7 +32,8 @@ export class MembersService {
             .orWhereILike('email', `%${query.q}%`)
             .orWhereILike('nia', `%${query.q}%`);
         }
-
+      })
+      .where((builder) => {
         if (query.status && query.status != 'all') {
           builder.where('status', query.status);
         }
