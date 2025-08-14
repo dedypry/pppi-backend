@@ -23,10 +23,13 @@ import { getHtmlContent } from '../../services/html-contect';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ExcelService } from 'utils/services/excel.service';
 import { UpdateSettingDto } from './dto/update.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Controller('members')
 export class MembersController {
   constructor(
+    @InjectQueue('MAIL-QUEUE') private readonly queue: Queue,
     private readonly membersService: MembersService,
     private readonly pdfService: PdfService,
     private readonly excelService: ExcelService,
@@ -69,11 +72,8 @@ export class MembersController {
   @UseGuards(AuthGuard)
   async downloadPDF(@Res() res: Response, @Param('id') id: number) {
     const user = await this.membersService.detail(id);
-    console.log('USER', user);
 
     const html = await getHtmlContent('kta', { ...user });
-
-    console.log('HTML', html);
 
     await this.pdfService.downloadPdf({
       htmlContent: html,
@@ -91,5 +91,13 @@ export class MembersController {
     const result = this.excelService.parseExcel(file.buffer);
 
     return this.membersService.uploadBulkMemberFromExcel(result[0].rows as any);
+  }
+
+  @Post('send-mail/:id')
+  @UseInterceptors(FileInterceptor('file'))
+  sendMail(@Param('id') id: number) {
+    this.queue.add('send-kta', { userId: id });
+
+    return 'Email sudah di proses, dan akan dikirimkan beberapa saat lagi!!!';
   }
 }

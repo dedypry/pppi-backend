@@ -2,6 +2,8 @@ import { join } from 'path';
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
 
+Handlebars.registerHelper('upper', (val: string) => val.toUpperCase());
+
 export async function getHtmlContent(
   templateName: string,
   data: Record<string, any>,

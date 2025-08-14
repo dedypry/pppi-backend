@@ -10,7 +10,7 @@ interface IPdf {
 }
 
 interface IPdfDownload extends IPdf {
-  res: Response;
+  res?: Response;
   name?: string;
 }
 @Injectable()
@@ -51,6 +51,10 @@ export class PdfService {
       htmlContent,
       landscape,
     });
+
+    if (!res) {
+      return Buffer.from(pdf);
+    }
 
     return res
       .set({

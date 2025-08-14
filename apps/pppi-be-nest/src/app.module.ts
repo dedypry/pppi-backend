@@ -11,6 +11,12 @@ import { ProfileModule } from './domains/profile/profile.module';
 import { SchedulersModule } from './domains/schedulers/schedulers.module';
 import { MessagesModule } from './domains/messages/messages.module';
 import { BlogCommentsModule } from './domains/blog-comments/blog-comments.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
+import { fnHandlebar } from './services/handlebars';
+import { PdfService } from 'utils/services/pdf.service';
+import BullConfig from 'utils/modules/BullConfig.module';
 
 @Module({
   imports: [
@@ -25,7 +31,35 @@ import { BlogCommentsModule } from './domains/blog-comments/blog-comments.module
     SchedulersModule,
     MessagesModule,
     BlogCommentsModule,
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+          user: 'noreplypppi@gmail.com',
+          pass: 'lncwetstxghdrmsc',
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeout: 10000,
+      },
+
+      defaults: {
+        from: '"PPPI" <noreplypppi@gmail.com>',
+      },
+      template: {
+        dir: join(process.cwd(), 'dist/apps/pppi-be-nest', 'views/emails'),
+        adapter: new HandlebarsAdapter(fnHandlebar),
+        options: {
+          strict: true,
+        },
+      },
+    }),
+    BullConfig,
   ],
   controllers: [AppController],
+  providers: [PdfService],
 })
 export class AppModule {}

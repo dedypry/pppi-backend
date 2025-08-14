@@ -9,10 +9,10 @@ export function customFormat(date: any, format = 'DDMMYYYY') {
     return date;
   }
 }
-export function formatDate(date: any) {
+export function formatDate(date: any, format = 'DD MMMM YYYY') {
   try {
     if (!date) return '-';
-    return dayjs(date);
+    return dayjs(date).format(format);
   } catch (error) {
     console.error('err', error, date);
     return date;
