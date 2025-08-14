@@ -61,14 +61,17 @@ export class MemberCreateDto {
   @IsNotEmpty()
   address: string;
 
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   province_id: number;
 
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   city_id: number;
 
+  @IsOptional()
   @IsNumber()
   @Type(() => Number)
   district_id: number;
