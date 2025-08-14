@@ -23,13 +23,13 @@ export class MemberCreateDto {
   @MaxLength(20)
   nik: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
   front_title: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
   back_title: string;
 
