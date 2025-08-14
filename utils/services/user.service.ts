@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import * as dayjs from 'dayjs';
 import { CityModel } from 'models/Citie.model';
 import { ProvinceModel } from 'models/Province.model';
@@ -20,10 +21,15 @@ interface IGenNiaSimple {
 }
 
 export async function generateNia(data: IGenNia) {
+  if (!data.provinceId || !data.cityId) {
+    throw new ForbiddenException('Isi Provinsi dan kota terlebih dahulu');
+  }
   const province = await ProvinceModel.query().findById(data.provinceId);
   const city = await CityModel.query().findById(data.cityId);
-  const { max }: any = await UserModel.query().max('sort').first();
-  const sortNumber = String(data?.sort || max + 1 || 1);
+  const { max }: any = await UserModel.query().max('nia').first();
+  const split = max.split('.');
+  const sortNumber = Number(split[split.length - 1]) + 1;
+
   const year = data.joinYear || dayjs().format('YY');
   const birtDate = dayjs(data.dateBirth).format('YY');
 

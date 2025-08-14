@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MemberCreateDto } from './dto/create.dto';
 import { UserModel } from 'models/User.model';
@@ -20,6 +19,25 @@ export class MembersService {
   async list(query: PaginationDto) {
     return await UserModel.query()
       .modify('list')
+      .where((builder) => {
+        if (query.q) {
+          builder
+            .whereILike('name', `%${query.q}%`)
+            .orWhereILike('email', `%${query.q}%`)
+            .orWhereILike('nia', `%${query.q}%`);
+        }
+
+        if (query.status && query.status != 'all') {
+          builder.where('status', query.status);
+        }
+      })
+      .modify((builder) => {
+        if (query.q) {
+          builder
+            .joinRelated('profile')
+            .orWhereILike('profile.phone', `%${query.q}%`);
+        }
+      })
       .withGraphFetched('[profile.[province, city, district] ]')
       .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
       .page(query.page, query.pageSize);
@@ -100,6 +118,7 @@ export class MembersService {
       joinYear: Number(member.join_year),
     });
 
+    console.log(nia);
     const status = body.approved ? 'approved' : 'rejected';
 
     await member.$query().update({

@@ -13,4 +13,6 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   q?: string;
+
+  status?: string;
 }

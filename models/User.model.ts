@@ -51,7 +51,7 @@ export class UserModel extends Model {
       'rejected_by',
       'rejected_note',
       'sort',
-      'created_at',
+      'users.created_at',
       'bio',
     );
   }
