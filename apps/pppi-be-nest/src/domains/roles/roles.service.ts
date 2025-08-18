@@ -13,15 +13,15 @@ import { AnyQueryBuilder } from 'objection';
 @Injectable()
 export class RolesService {
   async list(query: PaginationDto) {
+    console.log('QUERY', query);
     const roles = RoleModel.query()
       .withGraphFetched('users(userLisr)')
-
       .modifiers({
         userLisr: (query: AnyQueryBuilder) =>
           query.select('users.id', 'users.name', 'users.email').limit(5),
       });
 
-    if (query.page) {
+    if (query.page >= 0) {
       return await roles.page(query.page, query.pageSize);
     }
 
@@ -41,7 +41,6 @@ export class RolesService {
       id: body.id,
       ...bodyRole,
     });
-    console.log('ROLE', role);
 
     if (body?.user_id?.length && role?.id) {
       console.log('MASUK', body);

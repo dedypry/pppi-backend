@@ -17,6 +17,7 @@ import { join } from 'path';
 import { fnHandlebar } from './services/handlebars';
 import { PdfService } from 'utils/services/pdf.service';
 import { DashboardModule } from './domains/dashboard/dashboard.module';
+import { OrganizationsModule } from './domains/organizations/organizations.module';
 import BullConfig from 'utils/modules/BullConfig.module';
 
 @Module({
@@ -60,6 +61,7 @@ import BullConfig from 'utils/modules/BullConfig.module';
     }),
     BullConfig,
     DashboardModule,
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [PdfService],
