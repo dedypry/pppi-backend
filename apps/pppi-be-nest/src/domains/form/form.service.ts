@@ -14,7 +14,7 @@ export class FormService {
     const result = FormModel.query()
       .alias('f')
       .select('f.*', raw('coalesce(fs.result_total,0)::int').as('result_total'))
-      .join(
+      .leftJoin(
         FormResultModel.query()
           .select('form_id', raw('count(*) as result_total'))
           .groupBy('form_id')
