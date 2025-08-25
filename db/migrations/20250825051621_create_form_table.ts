@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
     table.increments('id').primary();
     table.string('title');
     table.string('slug');
-    table.string('description');
+    table.text('description');
     table.boolean('member_required').defaultTo(true);
     table.timestamps(true, true);
   });
