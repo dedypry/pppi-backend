@@ -20,6 +20,7 @@ import { DashboardModule } from './domains/dashboard/dashboard.module';
 import { OrganizationsModule } from './domains/organizations/organizations.module';
 import { AppsModule } from './domains/apps/apps.module';
 import { PackagesModule } from './domains/packages/packages.module';
+import { FormModule } from './domains/form/form.module';
 import BullConfig from 'utils/modules/BullConfig.module';
 
 @Module({
@@ -66,6 +67,7 @@ import BullConfig from 'utils/modules/BullConfig.module';
     OrganizationsModule,
     AppsModule,
     PackagesModule,
+    FormModule,
   ],
   controllers: [AppController],
   providers: [PdfService],
