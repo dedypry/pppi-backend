@@ -9,4 +9,5 @@ export class FormHeaderModel extends Model {
   title: string;
   type: string;
   options: any;
+  required: boolean;
 }

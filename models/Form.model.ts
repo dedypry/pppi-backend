@@ -7,7 +7,7 @@ export class FormModel extends Model {
   title: string;
   slug: string;
   description: string;
-  member_requied: boolean;
+  member_required: boolean;
 
   @HasMany(() => FormHeaderModel, {
     from: 'forms.id',
