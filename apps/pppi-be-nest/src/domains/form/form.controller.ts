@@ -42,6 +42,11 @@ export class FormController {
     return this.formService.formResult(body);
   }
 
+  @Delete('header/:id')
+  formResultDestroy(@Param('id') id: number) {
+    return this.formService.formResultDelete(id);
+  }
+
   @Delete(':id')
   destroy(@Param('id') id: number) {
     return this.formService.destroy(id);

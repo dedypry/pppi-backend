@@ -119,4 +119,14 @@ export class FormService {
 
     return 'Data Berhasil di hapus';
   }
+
+  async formResultDelete(id: number) {
+    const header = await FormResultModel.query().findById(id);
+
+    if (!header) throw new NotFoundException();
+
+    await header.$query().delete();
+
+    return 'Data berhasil di hapus';
+  }
 }
