@@ -37,3 +37,8 @@ export class SubmitFormResultDto {
   @IsNotEmpty()
   value: string;
 }
+
+export class UpdateFormStatus {
+  @IsString()
+  status: string;
+}

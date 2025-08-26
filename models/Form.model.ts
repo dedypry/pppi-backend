@@ -1,7 +1,8 @@
-import { HasMany, Table } from 'decorators/objections';
+import { BelongsToOne, HasMany, Table } from 'decorators/objections';
 import { Model } from '.';
 import { FormHeaderModel } from './FormHeader.model';
 import { FormResultModel } from './FormResult.model';
+import { UserModel } from './User.model';
 
 @Table('forms')
 export class FormModel extends Model {
@@ -23,4 +24,10 @@ export class FormModel extends Model {
     to: 'form_results.form_id',
   })
   form_results: FormResultModel;
+
+  @BelongsToOne(() => UserModel, {
+    from: 'forms.created_id',
+    to: 'users.id',
+  })
+  created_by: UserModel;
 }

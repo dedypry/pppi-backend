@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateFormDto, SubmitFormResultDto } from './dto/create.dto';
+import {
+  CreateFormDto,
+  SubmitFormResultDto,
+  UpdateFormStatus,
+} from './dto/create.dto';
 import { FormModel } from 'models/Form.model';
 import { Slug } from 'utils/helpers/global';
 import { FormHeaderModel } from 'models/FormHeader.model';
@@ -20,6 +24,7 @@ export class FormService {
     const result = FormModel.query()
       .alias('f')
       .select('f.*', raw('coalesce(fs.result_total,0)::int').as('result_total'))
+      .withGraphFetched('created_by(list)')
       .leftJoin(
         FormResultModel.query()
           .select('form_id', raw('count(*) as result_total'))
@@ -42,18 +47,22 @@ export class FormService {
     return await result;
   }
 
-  async detail(slug: string) {
+  async detail(slug: string, type: string = '') {
     const where = isNaN(Number(slug)) ? 'slug' : 'id';
     const result = await FormModel.query()
       .withGraphFetched('form_headers(sortOrder)')
       .where(where, slug)
-      // .where('status', 'active')
+      .where((builder) => {
+        if (type === 'member') {
+          builder.where('status', 'active');
+        }
+      })
       .first()
       .modifiers({
         sortOrder: (query: AnyQueryBuilder) => query.orderBy('sort', 'asc'),
       });
 
-    if (!result) throw new NotFoundException('not_active');
+    if (!result) throw new NotFoundException('Form ini sudah tidak aktif');
     return result;
   }
   async detailResult(slug: string) {
@@ -144,5 +153,17 @@ export class FormService {
     await header.$query().delete();
 
     return 'Data berhasil di hapus';
+  }
+
+  async updateStatus(body: UpdateFormStatus, id: number) {
+    const form = await FormModel.query().findById(id);
+
+    if (!form) throw new NotFoundException();
+
+    await form.$query().update({
+      status: body.status,
+    });
+
+    return 'Status Berhasil di update';
   }
 }

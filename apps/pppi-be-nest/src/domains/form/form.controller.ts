@@ -4,13 +4,18 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { FormService } from './form.service';
-import { CreateFormDto, SubmitFormResultDto } from './dto/create.dto';
+import {
+  CreateFormDto,
+  SubmitFormResultDto,
+  UpdateFormStatus,
+} from './dto/create.dto';
 import { AuthGuard } from 'guard/auth.guard';
 import { PaginationDto } from 'utils/dto/pagination.dto';
 
@@ -26,6 +31,10 @@ export class FormController {
   @Get(':slug')
   detail(@Param('slug') slug: string) {
     return this.formService.detail(slug);
+  }
+  @Get('member/:slug')
+  detailMember(@Param('slug') slug: string) {
+    return this.formService.detail(slug, 'member');
   }
 
   @Get('result/:slug')
@@ -52,5 +61,10 @@ export class FormController {
   @Delete(':id')
   destroy(@Param('id') id: number) {
     return this.formService.destroy(id);
+  }
+
+  @Patch('status/:id')
+  updateStatus(@Param('id') id: number, @Body() body: UpdateFormStatus) {
+    return this.formService.updateStatus(body, id);
   }
 }
