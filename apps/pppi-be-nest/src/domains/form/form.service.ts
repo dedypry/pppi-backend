@@ -47,7 +47,7 @@ export class FormService {
     const result = await FormModel.query()
       .withGraphFetched('form_headers(sortOrder)')
       .where(where, slug)
-      .where('status', 'active')
+      // .where('status', 'active')
       .first()
       .modifiers({
         sortOrder: (query: AnyQueryBuilder) => query.orderBy('sort', 'asc'),
