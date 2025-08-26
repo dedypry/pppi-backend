@@ -31,9 +31,13 @@ import BullConfig from 'utils/modules/BullConfig.module';
         port: 587,
         secure: false,
         auth: {
-          user: 'noreplypppi@gmail.com',
-          pass: 'lncwetstxghdrmsc',
+          user: 'dpn.p3i@gmail.com',
+          pass: 'hilnzuetqqwdklez',
         },
+        // auth: {
+        //   user: 'noreplypppi@gmail.com',
+        //   pass: 'lncwetstxghdrmsc',
+        // },
         tls: {
           rejectUnauthorized: false,
         },
