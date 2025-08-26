@@ -25,17 +25,6 @@ import BullConfig from 'utils/modules/BullConfig.module';
 
 @Module({
   imports: [
-    AuthModule,
-    BannersModule,
-    AreaModule,
-    RolesModule,
-    MembersModule,
-    BlogsModule,
-    UsersModule,
-    ProfileModule,
-    SchedulersModule,
-    MessagesModule,
-    BlogCommentsModule,
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -63,6 +52,17 @@ import BullConfig from 'utils/modules/BullConfig.module';
       },
     }),
     BullConfig,
+    AuthModule,
+    BannersModule,
+    AreaModule,
+    RolesModule,
+    MembersModule,
+    BlogsModule,
+    UsersModule,
+    ProfileModule,
+    SchedulersModule,
+    MessagesModule,
+    BlogCommentsModule,
     DashboardModule,
     OrganizationsModule,
     AppsModule,

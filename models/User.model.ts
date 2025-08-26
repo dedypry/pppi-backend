@@ -29,6 +29,8 @@ export class UserModel extends Model {
   deleted_by?: number;
   rejected_note?: string;
   bio?: string;
+  token?: string | null;
+  token_at?: string | null;
 
   @Modifier
   list(query: AnyQueryBuilder) {

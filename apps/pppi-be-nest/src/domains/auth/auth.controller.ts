@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import LoginDto from './dto/login.dto';
+import LoginDto, { ForgotPasswordDto, ResetPasswordDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -9,6 +9,15 @@ export class AuthController {
   @Post('login')
   login(@Body() body: LoginDto) {
     return this.authService.login(body);
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.authService.forgotPassword(body);
+  }
+  @Post('reset-password')
+  resetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
   }
 
   @Delete('logout')

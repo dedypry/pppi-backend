@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   BadRequestException,
   ForbiddenException,
@@ -5,16 +6,24 @@ import {
   NotAcceptableException,
   NotFoundException,
 } from '@nestjs/common';
-import LoginDto from './dto/login.dto';
+import LoginDto, { ForgotPasswordDto, ResetPasswordDto } from './dto/login.dto';
 import { UserModel } from 'models/User.model';
-import { comparePassword } from 'utils/helpers/bcrypt';
+import { comparePassword, hashPassword } from 'utils/helpers/bcrypt';
 import { fn } from 'objection';
 import { PersonalTokenModel } from 'models/PersonalToken.model';
 import { sign } from 'utils/helpers/jwt';
 import * as dayjs from 'dayjs';
+import { generateRandomString } from 'utils/helpers/global';
+import { MailerService } from '@nestjs-modules/mailer';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private readonly mailService: MailerService,
+    @InjectQueue('AUTH-QUEUE') private readonly queue: Queue,
+  ) {}
   async login(body: LoginDto) {
     let user: any = null;
 
@@ -26,12 +35,18 @@ export class AuthService {
         .first();
 
       if (!user) throw new NotFoundException('User Not Found');
+    } else if (body.type == 'member') {
+      user = await UserModel.query()
+        .joinRelated('roles')
+        .where('email', body.email)
+        .whereIn('roles.title', ['member'])
+        .first();
+
+      if (!user) throw new NotFoundException('User Not Found');
     } else {
       throw new ForbiddenException();
     }
 
-    console.log(user);
-    // throw new ForbiddenException();
     const match = comparePassword(body.password, user?.password);
 
     if (!match) throw new BadRequestException('Password Not Match');
@@ -75,5 +90,36 @@ export class AuthService {
     await personalToken.$query().delete();
 
     return 'Logout Success';
+  }
+
+  async forgotPassword(body: ForgotPasswordDto) {
+    const user = await UserModel.query()
+      .where('email', body.email)
+      .orWhere('nia', body.email)
+      .first();
+
+    if (!user) throw new NotFoundException('Email tidak ditemukan');
+
+    await user.$query().update({
+      token: generateRandomString(8),
+      token_at: fn.now(),
+    });
+
+    this.queue.add('forgot-password', { userId: user.id });
+
+    return `Kami sudah mengirim ke Email ${user.email}, Silahkan cek untuk reset password`;
+  }
+
+  async resetPassword(body: ResetPasswordDto) {
+    const user = await UserModel.query().findOne('token', body.token);
+
+    if (!user) throw new NotFoundException();
+
+    await user.$query().update({
+      token: null,
+      token_at: null,
+      password: hashPassword(body.new_password),
+    });
+    return 'Password Berhasil di reset';
   }
 }
