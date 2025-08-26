@@ -18,6 +18,7 @@ import {
   setFileParent,
 } from 'utils/services/file-gallery.service';
 import { fn } from 'objection';
+import { UserModel } from 'models/User.model';
 
 @Injectable()
 export class BlogsService {
@@ -76,6 +77,12 @@ export class BlogsService {
     return await BlogModel.query()
       .withGraphFetched('[category, writer(list)]')
       .orderBy('created_at', 'DESC')
+      .where((builder) => {
+        if (query?.user && query.user != 'undefined') {
+          console.log('QUERY', query);
+          builder.where('writer_id', query.user);
+        }
+      })
       .page(query.page, query.pageSize);
   }
 
@@ -91,6 +98,27 @@ export class BlogsService {
 
   async createBlogs(body: BlogCreateDto, userId: number) {
     const slug = await this.generateSlug(body.title);
+
+    if (body.id) {
+      const dataBlog = await BlogModel.query().findById(body.id);
+
+      const user = await UserModel.query()
+        .withGraphFetched('roles')
+        .findById(userId);
+
+      const roles = user?.roles.map((item) => item.slug) || [];
+
+      const isAdmin = roles.some((role) =>
+        ['admin', 'super-admin'].includes(role),
+      );
+      if (!isAdmin) {
+        if (dataBlog?.writer_id != userId) {
+          throw new ForbiddenException('Anda Tidak Berhak Update Blog ini');
+        }
+      }
+
+      userId = dataBlog?.writer_id as any;
+    }
 
     const blog = await BlogModel.query().upsertGraph({
       id: body?.id,
@@ -114,19 +142,36 @@ export class BlogsService {
   }
 
   async generateSlug(slug: string): Promise<string> {
-    const sl = Slug(slug);
+    let sl = Slug(slug);
     const blog = await BlogModel.query().findOne('slug', sl);
 
+    console.log('BLOG', blog?.slug, sl);
     if (blog) {
-      slug = await this.generateSlug(`${slug}-${generateRandomString(4)}`);
+      sl = await this.generateSlug(`${slug}-${generateRandomString(4)}`);
     }
     return sl;
   }
 
-  async destroy(slug: string) {
+  async destroy(slug: string, userId: number) {
     const blog = await BlogModel.query().findOne('slug', slug);
 
     if (!blog) throw new NotFoundException();
+
+    const user = await UserModel.query()
+      .withGraphFetched('roles')
+      .findById(userId);
+
+    const roles = user?.roles.map((item) => item.slug) || [];
+
+    const isAdmin = roles.some((role) =>
+      ['admin', 'super-admin'].includes(role),
+    );
+
+    if (!isAdmin) {
+      if (blog?.writer_id != userId) {
+        throw new ForbiddenException('Anda Tidak Berhak Update Blog ini');
+      }
+    }
 
     await BlogCommentsModel.query().where('blog_id', blog.id).delete();
     destroyFile({

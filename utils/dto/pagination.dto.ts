@@ -17,4 +17,5 @@ export class PaginationDto {
   status?: string;
 
   type?: string;
+  user?: number | string;
 }

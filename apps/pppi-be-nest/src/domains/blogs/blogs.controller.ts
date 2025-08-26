@@ -36,8 +36,8 @@ export class BlogsController {
 
   @Delete(':slug')
   @UseGuards(AuthGuard)
-  destroy(@Param('slug') slug: string) {
-    return this.blogsService.destroy(slug);
+  destroy(@Param('slug') slug: string, @Req() req: any) {
+    return this.blogsService.destroy(slug, req['user']['id']);
   }
 
   @Patch('status/:id')

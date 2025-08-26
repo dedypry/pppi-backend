@@ -12,8 +12,6 @@ import {
   UpdateProfileDto,
 } from './dto/update.dto';
 import { ProfileModel } from 'models/Profile.model';
-import { generateNia } from 'utils/services/user.service';
-import * as dayjs from 'dayjs';
 import {
   destroyFile,
   setFileParent,
@@ -35,26 +33,11 @@ export class ProfileService {
     if (!user) throw new NotFoundException();
 
     await UserModel.transaction(async (trx) => {
-      let nia = '';
-      if (!user.nia) {
-        const genNia = await generateNia({
-          provinceId: body.province_id,
-          cityId: body.city_id,
-          joinYear: Number(dayjs(user.created_at).format('YY')),
-          dateBirth: body.date_birth,
-        });
-
-        nia = genNia.nia;
-      }
-
       await user.$query(trx).update({
         name: body.name,
         email: body.email,
         front_title: body.front_title,
         back_title: body.back_title,
-        ...(nia && {
-          nia,
-        }),
       });
 
       const payloadProfile = {
