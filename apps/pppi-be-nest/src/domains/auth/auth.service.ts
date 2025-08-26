@@ -30,7 +30,7 @@ export class AuthService {
     if (body.type == 'admin') {
       user = await UserModel.query()
         .joinRelated('roles')
-        .where('email', body.email)
+        .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
         .whereIn('roles.title', ['admin', 'super-admin'])
         .first();
 
@@ -38,7 +38,7 @@ export class AuthService {
     } else if (body.type == 'member') {
       user = await UserModel.query()
         .joinRelated('roles')
-        .where('email', body.email)
+        .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
         .whereIn('roles.title', ['member'])
         .first();
 
