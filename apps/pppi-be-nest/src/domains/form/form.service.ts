@@ -10,7 +10,13 @@ import { UserModel } from 'models/User.model';
 
 @Injectable()
 export class FormService {
-  async list(query: PaginationDto) {
+  async list(query: PaginationDto, user: any) {
+    if (query.type === 'member') {
+      const dataUser = await UserModel.query().findById(user.id);
+
+      if (!dataUser) throw new NotFoundException();
+    }
+
     const result = FormModel.query()
       .alias('f')
       .select('f.*', raw('coalesce(fs.result_total,0)::int').as('result_total'))
@@ -22,6 +28,11 @@ export class FormService {
         'fs.form_id',
         'f.id',
       )
+      .where((builder) => {
+        if (query.type === 'member') {
+          builder.where('created_id', user.id);
+        }
+      })
       .orderBy('created_at', 'desc');
 
     if (query.page >= 0) {
@@ -35,11 +46,13 @@ export class FormService {
     const where = isNaN(Number(slug)) ? 'slug' : 'id';
     const result = await FormModel.query()
       .withGraphFetched('form_headers(sortOrder)')
-      .findOne(where, slug)
+      .where(where, slug)
+      .where('status', 'active')
       .modifiers({
         sortOrder: (query: AnyQueryBuilder) => query.orderBy('sort', 'asc'),
       });
 
+    if (!result) throw new NotFoundException('not_active');
     return result;
   }
   async detailResult(slug: string) {
@@ -59,13 +72,15 @@ export class FormService {
     return result;
   }
 
-  async create(body: CreateFormDto) {
+  async create(body: CreateFormDto, user: any) {
     const form = await FormModel.query().upsertGraphAndFetch({
       id: body.id,
       title: body.title,
       slug: Slug(body.title),
       description: body.description,
       member_required: body.member_required,
+      created_id: user.id,
+      status: 'submission',
     });
 
     await FormHeaderModel.query().where('form_id', form.id).delete();

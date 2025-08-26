@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { FormService } from './form.service';
@@ -17,8 +18,9 @@ import { PaginationDto } from 'utils/dto/pagination.dto';
 export class FormController {
   constructor(private readonly formService: FormService) {}
   @Get()
-  list(@Query() query: PaginationDto) {
-    return this.formService.list(query);
+  @UseGuards(AuthGuard)
+  list(@Query() query: PaginationDto, @Req() req: any) {
+    return this.formService.list(query, req['user']);
   }
 
   @Get(':slug')
@@ -33,8 +35,8 @@ export class FormController {
 
   @Post()
   @UseGuards(AuthGuard)
-  createForm(@Body() body: CreateFormDto) {
-    return this.formService.create(body);
+  createForm(@Body() body: CreateFormDto, @Req() req: any) {
+    return this.formService.create(body, req['user']);
   }
 
   @Post('result')

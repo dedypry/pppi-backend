@@ -8,6 +8,8 @@ export class FormModel extends Model {
   title: string;
   slug: string;
   description: string;
+  status: string;
+  created_id: number;
   member_required: boolean;
 
   @HasMany(() => FormHeaderModel, {
