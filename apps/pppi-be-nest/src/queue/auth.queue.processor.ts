@@ -16,7 +16,7 @@ export class AuthQueueProcessor {
 
       if (user) {
         await this.mailService.sendMail({
-          to: 'dedypry@gmail.com',
+          to: user.email,
           template: './forgot-password',
           context: {
             name: user?.name,
