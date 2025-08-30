@@ -18,6 +18,7 @@ export class AuthQueueProcessor {
         await this.mailService.sendMail({
           to: user.email,
           template: './forgot-password',
+          subject: 'PPPI - Lupa Password',
           context: {
             name: user?.name,
             link: `${process.env.FRONT_WEB}/reset-password/${user?.token}`,
