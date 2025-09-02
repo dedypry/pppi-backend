@@ -3,6 +3,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import { UserModel } from 'models/User.model';
 import 'dotenv/config';
+import { NotFoundException } from '@nestjs/common';
 @Processor('AUTH-QUEUE')
 export class AuthQueueProcessor {
   constructor(private readonly mailService: MailerService) {}
@@ -12,7 +13,11 @@ export class AuthQueueProcessor {
     const { userId } = job.data;
 
     try {
-      const user = await UserModel.query().findById(userId);
+      const user = await UserModel.query()
+        .where('id', userId)
+        .where('is_active', true)
+        .where('status', 'approved')
+        .first();
 
       if (user) {
         await this.mailService.sendMail({
@@ -26,7 +31,7 @@ export class AuthQueueProcessor {
         });
         console.log('SUCCESS SEND EMAIL = ', user?.email);
       } else {
-        console.error('user not found');
+        throw new NotFoundException('User tidak ada atau tidak aktif');
       }
     } catch (error) {
       console.error(error);

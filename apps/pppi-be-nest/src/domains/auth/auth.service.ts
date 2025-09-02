@@ -96,9 +96,14 @@ export class AuthService {
     const user = await UserModel.query()
       .where('email', body.email)
       .orWhere('nia', body.email)
+      .where('is_active', true)
+      .where('status', 'approved')
       .first();
 
-    if (!user) throw new NotFoundException('Email tidak ditemukan');
+    if (!user)
+      throw new NotFoundException(
+        'Email tidak ditemukan/ User belum aktif, silahkan hubungi pppi di kontak',
+      );
 
     await user.$query().update({
       token: generateRandomString(8),
