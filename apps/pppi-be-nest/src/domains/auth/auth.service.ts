@@ -35,7 +35,7 @@ export class AuthService {
             .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
             .orWhere('nia', body.email);
         })
-        .whereIn('roles.title', ['admin', 'super-admin'])
+        .whereIn('roles.title', ['admin', 'super-admin', 'biro'])
         .first();
 
       if (!user) throw new NotFoundException('User Not Found');
