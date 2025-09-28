@@ -3,6 +3,7 @@ import * as dayjs from 'dayjs';
 import { CityModel } from 'models/Citie.model';
 import { ProvinceModel } from 'models/Province.model';
 import { UserModel } from 'models/User.model';
+import { raw } from 'objection';
 
 interface IGenNia {
   provinceId: number;
@@ -26,9 +27,11 @@ export async function generateNia(data: IGenNia) {
   }
   const province = await ProvinceModel.query().findById(data.provinceId);
   const city = await CityModel.query().findById(data.cityId);
-  const { max }: any = await UserModel.query().max('nia').first();
-  const split = max.split('.');
-  const sortNumber = Number(split[split.length - 1]) + 1;
+  const { max }: any = await UserModel.query()
+    .max(raw("CAST(NULLIF(split_part(nia, '.', 5), '') AS INTEGER)"))
+    .first();
+
+  const sortNumber = max + 1;
 
   const year = data.joinYear || dayjs().format('YY');
   const birtDate = dayjs(data.dateBirth).format('YY');
