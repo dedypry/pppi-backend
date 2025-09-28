@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   ForbiddenException,
   Injectable,
@@ -19,9 +20,12 @@ import { customFormat, getYear, toIsoString } from 'utils/helpers/date-format';
 import { BackgroundJobModel } from 'models/BackgroundJob.model';
 import { UpdateSettingDto } from './dto/update.dto';
 import { DistrictModel } from 'models/District.model';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class MembersService {
+  constructor(@InjectQueue('MAIL-QUEUE') private readonly queue: Queue) {}
   async list(query: PaginationDto) {
     return await UserModel.query()
       .modify('list')
@@ -169,6 +173,9 @@ export class MembersService {
           }),
     });
 
+    if (body.approved) {
+      this.queue.add('send-kta', { userId: id });
+    }
     return 'Member berhasil di update';
   }
 

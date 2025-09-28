@@ -5,6 +5,7 @@ import { UserModel } from 'models/User.model';
 import { getHtmlContent } from '../services/html-contect';
 import { PdfService } from 'utils/services/pdf.service';
 import 'dotenv/config';
+
 @Processor('MAIL-QUEUE')
 export class MailQueueProcessor {
   constructor(
@@ -28,8 +29,13 @@ export class MailQueueProcessor {
           landscape: true,
         });
 
+        const email =
+          process.env.NODE_ENV !== 'production'
+            ? 'dedypry@gmail.com'
+            : user.email;
+
         await this.mailService.sendMail({
-          to: user.email,
+          to: email,
           subject: 'selamat datang',
           template: './login',
           context: user,
@@ -42,7 +48,7 @@ export class MailQueueProcessor {
           ],
         });
 
-        console.log('SUCCESS SEND EMAIL = ', user.email);
+        console.log('SUCCESS SEND EMAIL = ', email);
       }
     } catch (error) {
       console.error('ERROR', error);
