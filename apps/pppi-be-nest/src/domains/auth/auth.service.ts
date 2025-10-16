@@ -106,6 +106,7 @@ export class AuthService {
     const user = await UserModel.query()
       .where('email', body.email)
       .orWhere('nia', body.email)
+      .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email])
       .where('is_active', true)
       .where('status', 'approved')
       .first();
