@@ -33,7 +33,8 @@ export class AuthService {
         .where((builder) => {
           builder
             .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
-            .orWhere('nia', body.email);
+            .orWhere('nia', body.email)
+            .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email]);
         })
         .whereIn('roles.title', ['admin', 'super-admin', 'biro'])
         .first();
@@ -45,7 +46,8 @@ export class AuthService {
         .where((builder) => {
           builder
             .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
-            .orWhere('nia', body.email);
+            .orWhere('nia', body.email)
+            .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email]);
         })
         .whereIn('roles.title', ['member'])
         .first();
