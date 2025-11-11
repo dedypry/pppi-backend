@@ -26,36 +26,23 @@ export class AuthService {
   ) {}
   async login(body: LoginDto) {
     let user: any = null;
-
-    if (body.type == 'admin') {
-      user = await UserModel.query()
-        .joinRelated('roles')
-        .where((builder) => {
-          builder
-            .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
-            .orWhere('nia', body.email)
-            .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email]);
-        })
-        .whereIn('roles.title', ['admin', 'super-admin', 'biro'])
-        .first();
-
-      if (!user) throw new NotFoundException('User Not Found');
-    } else if (body.type == 'member') {
-      user = await UserModel.query()
-        .joinRelated('roles')
-        .where((builder) => {
-          builder
-            .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
-            .orWhere('nia', body.email)
-            .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email]);
-        })
-        .whereIn('roles.title', ['member'])
-        .first();
-
-      if (!user) throw new NotFoundException('User Not Found');
-    } else {
+    if (['admin', 'member'].includes(body.type)) {
       throw new ForbiddenException();
     }
+
+    user = await UserModel.query()
+      .joinRelated('roles')
+      .where((builder) => {
+        builder
+          .whereRaw('LOWER(email) = ?', [body.email.toLowerCase()])
+          .orWhere('nia', body.email)
+          .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.email]);
+      })
+      .whereIn(
+        'roles.title',
+        body.type == 'admin' ? ['admin', 'super-admin', 'biro'] : ['member'],
+      )
+      .first();
 
     const match = comparePassword(body.password, user?.password);
 
