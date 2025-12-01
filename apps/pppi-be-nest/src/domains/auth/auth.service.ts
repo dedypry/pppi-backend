@@ -12,7 +12,7 @@ import { comparePassword, hashPassword } from 'utils/helpers/bcrypt';
 import { fn } from 'objection';
 import { PersonalTokenModel } from 'models/PersonalToken.model';
 import { sign } from 'utils/helpers/jwt';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { generateRandomString } from 'utils/helpers/global';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectQueue } from '@nestjs/bull';
@@ -26,7 +26,7 @@ export class AuthService {
   ) {}
   async login(body: LoginDto) {
     let user: any = null;
-    if (['admin', 'member'].includes(body.type)) {
+    if (!['admin', 'member'].includes(body.type)) {
       throw new ForbiddenException();
     }
 
@@ -44,6 +44,11 @@ export class AuthService {
       )
       .first();
 
+    if (!user) {
+      throw new NotFoundException('User Not Found');
+    }
+
+    console.log('BODY', body.password, user?.password);
     const match = comparePassword(body.password, user?.password);
 
     if (!match) throw new BadRequestException('Password Not Match');
