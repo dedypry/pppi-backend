@@ -12,7 +12,7 @@ import { comparePassword, hashPassword } from 'utils/helpers/bcrypt';
 import { fn } from 'objection';
 import { PersonalTokenModel } from 'models/PersonalToken.model';
 import { sign } from 'utils/helpers/jwt';
-import dayjs from 'dayjs';
+import * as dayjs from 'dayjs';
 import { generateRandomString } from 'utils/helpers/global';
 import { MailerService } from '@nestjs-modules/mailer';
 import { InjectQueue } from '@nestjs/bull';
