@@ -10,7 +10,7 @@
       {
         "include": "../src/views/**/**",
         "outDir": "./dist/apps/pppi-be-nest",
-        "watchAssets": true
+        "watchAssets": false
       }
     ]
   },

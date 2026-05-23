@@ -1,0 +1,123 @@
+<html lang='id'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Invoice {{order_code}}</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #111827;
+        margin: 24px;
+        font-size: 12px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .muted {
+        color: #6b7280;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .box {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .box-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #e5e7eb;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #f9fafb;
+      }
+      .right {
+        text-align: right;
+      }
+      .total {
+        margin-top: 12px;
+        text-align: right;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      @media print {
+        body {
+          margin: 0;
+          padding: 12mm;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class='header'>
+      <div>
+        <div class='title'>Invoice</div>
+        <div class='muted'>#{{order_code}}</div>
+      </div>
+      <div>{{created_at_format}}</div>
+    </div>
+
+    <div class='grid'>
+      <div class='box'>
+        <div class='box-title'>Informasi Order</div>
+        <div>Kode: {{order_code}}</div>
+        <div>Status: {{status_label}}</div>
+        <div>Waktu: {{created_at_format}}</div>
+      </div>
+      <div class='box'>
+        <div class='box-title'>Informasi Pelanggan</div>
+        <div>Nama: {{customer_name}}</div>
+        <div>Email: {{customer_email}}</div>
+        <div>Telepon: {{customer_phone}}</div>
+        <div>Alamat: {{shipping_address}}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Detail</th>
+          <th>Qty</th>
+          <th>Harga</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+          <tr>
+            <td>{{product_name}}</td>
+            <td>{{detail}}</td>
+            <td class='right'>{{qty}}</td>
+            <td class='right'>{{price_format}}</td>
+            <td class='right'>{{subtotal_format}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class='total'>
+      Total: {{total_amount_format}}
+    </div>
+  </body>
+</html>

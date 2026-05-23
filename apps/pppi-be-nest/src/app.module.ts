@@ -22,6 +22,12 @@ import { AppsModule } from './domains/apps/apps.module';
 import { PackagesModule } from './domains/packages/packages.module';
 import { FormModule } from './domains/form/form.module';
 import BullConfig from 'utils/modules/BullConfig.module';
+import { PackageInterestsModule } from './domains/package-interests/package-interests.module';
+import { PartnersModule } from './domains/partners/partners.module';
+import { DepartmentsModule } from './domains/departments/departments.module';
+import { ProductsModule } from './domains/products/products.module';
+import { ShopOrdersModule } from './domains/shop-orders/shop-orders.module';
+import { ProductMastersModule } from './domains/product-masters/product-masters.module';
 
 @Module({
   imports: [
@@ -72,6 +78,12 @@ import BullConfig from 'utils/modules/BullConfig.module';
     AppsModule,
     PackagesModule,
     FormModule,
+    PackageInterestsModule,
+    PartnersModule,
+    DepartmentsModule,
+    ProductsModule,
+    ShopOrdersModule,
+    ProductMastersModule,
   ],
   controllers: [AppController],
   providers: [PdfService],

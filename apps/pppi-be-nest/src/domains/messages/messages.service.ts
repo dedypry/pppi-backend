@@ -1,9 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMessageDto } from './dto/create.dto';
 import { MessageModel } from 'models/Message.model';
+import { PaginationDto } from 'utils/dto/pagination.dto';
 
 @Injectable()
 export class MessagesService {
+  async list(query: PaginationDto) {
+    return await MessageModel.query()
+      .where((builder) => {
+        if (query.q) {
+          builder
+            .whereILike('name', `%${query.q}%`)
+            .orWhereILike('email', `%${query.q}%`)
+            .orWhereILike('subject', `%${query.q}%`)
+            .orWhereILike('content', `%${query.q}%`);
+        }
+      })
+      .orderBy('created_at', 'desc')
+      .page(query.page, query.pageSize);
+  }
+
   async create(body: CreateMessageDto) {
     await MessageModel.query().insert({
       name: body.name,

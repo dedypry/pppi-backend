@@ -1,25 +1,43 @@
-import { Knex } from 'knex';
+import type { Knex } from 'knex';
 import * as bcrypt from 'bcrypt';
 
 export async function seed(knex: Knex): Promise<void> {
-  // Deletes ALL existing entries
-  await knex('users').del();
+  const adminEmail = 'admin@gmail.com';
+  const adminPassword = bcrypt.hashSync('12345', 9);
+  const existingAdmin = await knex('users')
+    .where({ email: adminEmail })
+    .first('id');
 
-  // Inserts seed entries
-  const users = await knex('users')
-    .insert([
-      {
+  let adminUserId: number;
+
+  if (existingAdmin) {
+    await knex('users').where({ id: existingAdmin.id }).update({
+      password: adminPassword,
+    });
+    adminUserId = existingAdmin.id;
+  } else {
+    const [newUser] = await knex('users')
+      .insert({
         name: 'admin',
-        email: 'admin@gmail.com',
-        password: bcrypt.hashSync('12345', 9),
-      },
-    ])
-    .returning(['id']);
+        email: adminEmail,
+        password: adminPassword,
+      })
+      .returning(['id']);
 
-  await knex('role_user').insert(
-    users.map((e: any) => ({
-      user_id: e.id,
+    adminUserId = newUser.id;
+  }
+
+  const existingRole = await knex('role_user')
+    .where({
+      user_id: adminUserId,
       role_id: 1,
-    })),
-  );
+    })
+    .first();
+
+  if (!existingRole) {
+    await knex('role_user').insert({
+      user_id: adminUserId,
+      role_id: 1,
+    });
+  }
 }
