@@ -90,7 +90,7 @@ export class FormService {
       description: body.description,
       member_required: body.member_required,
       created_id: user.id,
-      status: 'submission',
+      ...(!body.id && { status: 'submission' }),
     });
 
     await FormHeaderModel.query().where('form_id', form.id).delete();
@@ -116,7 +116,10 @@ export class FormService {
     if (!form) throw new NotFoundException();
     let user: UserModel | undefined = undefined;
     if (form.member_required) {
-      user = await UserModel.query().findOne('nia', body.nia);
+      user = await UserModel.query()
+        .where('nia', body.nia)
+        .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.nia])
+        .first();
 
       if (!user) throw new NotFoundException('signup');
     }
