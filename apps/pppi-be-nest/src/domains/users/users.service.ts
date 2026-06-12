@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { UserModel } from 'models/User.model';
 import CheckEmailDto from './dto/check-mail.dto';
-import { fn } from 'objection';
 import { ProfileModel } from 'models/Profile.model';
 import { PaginationDto } from 'utils/dto/pagination.dto';
 import UpdateUserSettingDto from './dto/update-setting.dto';
@@ -26,7 +25,7 @@ export class UsersService {
         }
       })
       .orderBy('users.created_at', 'desc')
-      .page(query.page, query.pageSize);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async checkEmail(body: CheckEmailDto) {

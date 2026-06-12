@@ -17,13 +17,13 @@ export class FormModel extends Model {
     from: 'forms.id',
     to: 'form_headers.form_id',
   })
-  form_headers: FormHeaderModel;
+  form_headers: FormHeaderModel[];
 
   @HasMany(() => FormResultModel, {
     from: 'forms.id',
     to: 'form_results.form_id',
   })
-  form_results: FormResultModel;
+  form_results: FormResultModel[];
 
   @BelongsToOne(() => UserModel, {
     from: 'forms.created_id',

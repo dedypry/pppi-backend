@@ -21,8 +21,8 @@ export class RolesService {
           query.select('users.id', 'users.name', 'users.email').limit(5),
       });
 
-    if (query.page >= 0) {
-      return await roles.page(query.page, query.pageSize);
+    if (!query.noPagination) {
+      return await roles.page((query.page || 0) - 1, query.pageSize || 10);
     }
 
     return await roles;

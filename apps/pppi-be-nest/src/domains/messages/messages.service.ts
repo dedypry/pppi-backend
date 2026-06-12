@@ -17,7 +17,7 @@ export class MessagesService {
         }
       })
       .orderBy('created_at', 'desc')
-      .page(query.page, query.pageSize);
+      .page((query.page || 0) - 1, query.pageSize || 10);
   }
 
   async create(body: CreateMessageDto) {

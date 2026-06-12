@@ -11,7 +11,7 @@ export class SchedulersService {
   async list(query: PaginationDto) {
     const schedule = await SchedulerModel.query()
       .orderBy('created_at', 'desc')
-      .page(query.page, query.pageSize);
+      .page((query.page || 0) - 1, query.pageSize || 10);
 
     return schedule;
   }

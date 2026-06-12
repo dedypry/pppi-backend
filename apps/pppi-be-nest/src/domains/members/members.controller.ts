@@ -39,7 +39,7 @@ export class MembersController {
   @Get()
   @UseGuards(AuthGuard)
   list(@Query() query: PaginationDto) {
-    query.page = query.page - 1;
+    query.page = (query.page || 1) - 1;
     return this.membersService.list(query);
   }
 

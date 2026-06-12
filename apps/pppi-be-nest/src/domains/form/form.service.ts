@@ -11,6 +11,7 @@ import { PaginationDto } from 'utils/dto/pagination.dto';
 import { AnyQueryBuilder, raw } from 'objection';
 import { FormResultModel } from 'models/FormResult.model';
 import { UserModel } from 'models/User.model';
+import { DistrictModel } from 'models/District.model';
 
 @Injectable()
 export class FormService {
@@ -40,11 +41,11 @@ export class FormService {
       })
       .orderBy('created_at', 'desc');
 
-    if (query.page >= 0) {
-      return await result.page(query.page - 1, query.pageSize);
+    if (query.noPagination) {
+      return await result;
     }
 
-    return await result;
+    return await result.page((query.page || 0) - 1, query.pageSize || 10);
   }
 
   async detail(slug: string, type: string = '') {
@@ -67,7 +68,7 @@ export class FormService {
   }
   async detailResult(slug: string) {
     const where = isNaN(Number(slug)) ? 'slug' : 'id';
-    const result = await FormModel.query()
+    const results = await FormModel.query()
       .withGraphFetched(
         '[form_results(sortOrder).user(list).profile, form_headers(sortOrderHeader)]',
       )
@@ -79,7 +80,28 @@ export class FormService {
           query.orderBy('sort', 'asc'),
       });
 
-    return result;
+    if (!results) throw new NotFoundException('Form tidak ditemukan');
+
+    const regions =
+      await DistrictModel.query().withGraphFetched('city.province');
+
+    results.form_results.forEach((result: any) => {
+      results.form_headers.forEach((header: any) => {
+        if (header.type === 'region') {
+          const region = regions.find(
+            (r: any) => r.id === Number(result.value[header.key]),
+          );
+          result.value[header.key] =
+            region?.city?.province?.name +
+            ' - ' +
+            region?.city?.name +
+            ' - ' +
+            region?.name;
+        }
+      });
+    });
+
+    return results;
   }
 
   async create(body: CreateFormDto, user: any) {
