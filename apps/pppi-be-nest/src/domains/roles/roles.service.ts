@@ -22,7 +22,7 @@ export class RolesService {
       });
 
     if (!query.noPagination) {
-      return await roles.page((query.page || 0) - 1, query.pageSize || 10);
+      return await roles.page(query.page || 0, query.pageSize || 10);
     }
 
     return await roles;
