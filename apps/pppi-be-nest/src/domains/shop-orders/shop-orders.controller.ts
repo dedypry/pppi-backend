@@ -110,7 +110,10 @@ export class ShopOrdersController {
 
   @Patch(':id/status')
   @UseGuards(AuthGuard)
-  updateStatus(@Param('id') id: number, @Body() body: UpdateShopOrderStatusDto) {
+  updateStatus(
+    @Param('id') id: number,
+    @Body() body: UpdateShopOrderStatusDto,
+  ) {
     return this.shopOrdersService.updateStatus(id, body);
   }
 
