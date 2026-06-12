@@ -25,7 +25,7 @@ export class BlogsService {
   async listCategory(query: PaginationDto) {
     return await BlogCategoriesModel.query()
       .orderBy('created_at', 'DESC')
-      .page((query.page || 0) - 1, query.pageSize || 10);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async createBlogCategory(body: BlogCategoryCreateDto) {
@@ -83,7 +83,7 @@ export class BlogsService {
           builder.where('writer_id', query.user);
         }
       })
-      .page((query.page || 0) - 1, query.pageSize || 10);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async detailBlogs(slug: string) {

@@ -45,7 +45,7 @@ export class FormService {
       return await result;
     }
 
-    return await result.page((query.page || 0) - 1, query.pageSize || 10);
+    return await result.page(query.page || 0, query.pageSize || 10);
   }
 
   async detail(slug: string, type: string = '') {

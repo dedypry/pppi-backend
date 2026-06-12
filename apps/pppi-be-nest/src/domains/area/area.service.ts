@@ -20,7 +20,7 @@ export class AreaService {
       });
 
     if (query?.page) {
-      return await province.page((query.page || 0) - 1, query.pageSize || 10);
+      return await province.page(query.page || 0, query.pageSize || 10);
     }
 
     return await province;
@@ -44,7 +44,7 @@ export class AreaService {
         }
       });
     if (query?.page) {
-      return await city.page((query.page || 0) - 1, query.pageSize || 10);
+      return await city.page(query.page || 0, query.pageSize || 10);
     }
 
     return await city;
@@ -103,7 +103,7 @@ export class AreaService {
         }
       });
     if (query?.page) {
-      return await district.page((query.page || 0) - 1, query.pageSize || 10);
+      return await district.page(query.page || 0, query.pageSize || 10);
     }
 
     return await district;

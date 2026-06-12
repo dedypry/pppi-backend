@@ -41,7 +41,7 @@ export class PackageInterestsService {
         }
       })
       .orderBy('created_at', 'desc')
-      .page((query.page || 0) - 1, query.pageSize || 10);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async updateStatus(id: number, body: UpdatePackageInterestStatusDto) {

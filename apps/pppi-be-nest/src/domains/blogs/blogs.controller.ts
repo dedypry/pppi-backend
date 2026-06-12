@@ -24,7 +24,7 @@ export class BlogsController {
 
   @Get()
   list(@Query() query: PaginationDto) {
-    query.page = (query.page || 1) - 1;
+    query.page = query.page ? query.page - 1 : 0;
     return this.blogsService.listBlogs(query);
   }
 
@@ -48,7 +48,7 @@ export class BlogsController {
 
   @Get('categories')
   listCategory(@Query() query: PaginationDto) {
-    query.page = (query.page || 1) - 1;
+    query.page = query.page ? query.page - 1 : 0;
     return this.blogsService.listCategory(query);
   }
 

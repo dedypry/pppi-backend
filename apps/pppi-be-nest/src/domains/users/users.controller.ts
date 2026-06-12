@@ -23,7 +23,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Get()
   list(@Query() query: PaginationDto) {
-    query.page = (query.page || 1) - 1;
+    query.page = query.page ? query.page - 1 : 0;
     return this.usersService.list(query);
   }
 

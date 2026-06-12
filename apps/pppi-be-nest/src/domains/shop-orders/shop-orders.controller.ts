@@ -41,14 +41,14 @@ export class ShopOrdersController {
   @Get('admin/list')
   @UseGuards(AuthGuard)
   list(@Query() query: PaginationDto) {
-    query.page = (query.page || 1) - 1;
+    query.page = query.page ? query.page - 1 : 0;
     return this.shopOrdersService.list(query);
   }
 
   @Get('admin/transactions')
   @UseGuards(AuthGuard)
   transactions(@Query() query: PaginationDto) {
-    query.page = (query.page || 1) - 1;
+    query.page = query.page ? query.page - 1 : 0;
     return this.shopOrdersService.list(query);
   }
 

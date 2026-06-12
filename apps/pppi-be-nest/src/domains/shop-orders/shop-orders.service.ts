@@ -32,7 +32,7 @@ export class ShopOrdersService {
         }
       })
       .orderBy('created_at', 'desc')
-      .page((query.page || 0) - 1, query.pageSize || 10);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async notifications(limit?: number) {
