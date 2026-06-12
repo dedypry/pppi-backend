@@ -52,7 +52,7 @@ export class MembersService {
       .withGraphFetched('[profile.[province, city, district] ]')
       .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
       .orderBy('created_at', 'desc')
-      .page((query.page || 0) - 1, query.pageSize || 10);
+      .page(query.page || 0, query.pageSize || 10);
   }
 
   async detail(id: number) {

@@ -37,7 +37,7 @@ export class FormController {
 
   @Get('export/:id')
   @UseGuards(AuthGuard)
-  async export(@Res() res: Response, @Param('id') id: number, @Req() req: any) {
+  async export(@Res() res: Response, @Param('id') id: number) {
     const form = await this.formService.detailResult(id.toString());
 
     if (!form) throw new NotFoundException('Form tidak ditemukan');
