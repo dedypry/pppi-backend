@@ -14,6 +14,7 @@ import {
 export class BannersService {
   async list() {
     const banners = await BannerModel.query()
+      .where('is_active', true)
       .withGraphFetched('file')
       .orderBy('id', 'DESC');
 
