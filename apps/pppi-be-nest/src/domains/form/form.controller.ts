@@ -63,7 +63,7 @@ export class FormController {
           ? {
               ...(e.value as any),
               nia: e.nia,
-              name: e.name,
+              name: `${e.user?.front_title} ${e.name} ${e.user?.back_title}`,
             }
           : (e.value as any),
       ),
