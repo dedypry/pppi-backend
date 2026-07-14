@@ -68,7 +68,7 @@ export class AuthService {
     await PersonalTokenModel.query().insert({
       user_id: user.id,
       token: token,
-      exp: dayjs().add(2, 'day').toDate().toISOString(),
+      exp: dayjs().add(365, 'day').toDate().toISOString(),
     });
 
     return {

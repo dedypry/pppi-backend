@@ -1,5 +1,6 @@
-import { Controller, Delete, Get, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { BlogCommentsService } from './blog-comments.service';
+import { CreateCommentDto } from './dto/create.dto';
 
 @Controller('blog-comments')
 export class BlogCommentsController {
@@ -8,6 +9,11 @@ export class BlogCommentsController {
   @Get(':id')
   list(@Param('id') id: number) {
     return this.blogCommentsService.list(id);
+  }
+
+  @Post()
+  create(@Body() body: CreateCommentDto) {
+    return this.blogCommentsService.create(body);
   }
 
   @Delete(':id')

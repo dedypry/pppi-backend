@@ -1,0 +1,15 @@
+import type { Knex } from 'knex';
+
+export async function up(knex: Knex): Promise<void> {
+  await knex.schema.alterTable('users', (table) => {
+    table.boolean('is_need_verify').defaultTo(false);
+    table.boolean('is_verified').defaultTo(false);
+  });
+}
+
+export async function down(knex: Knex): Promise<void> {
+  await knex.schema.alterTable('users', (table) => {
+    table.dropColumn('is_need_verify');
+    table.dropColumn('is_verified');
+  });
+}

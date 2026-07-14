@@ -42,6 +42,14 @@ export class MembersService {
           builder.where('status', query.status);
         }
       })
+      .where((builder) => {
+        if (
+          query.verification_status &&
+          query.verification_status !== 'all'
+        ) {
+          builder.where('verification_status', query.verification_status);
+        }
+      })
       .modify((builder) => {
         if (query.q) {
           builder

@@ -4,6 +4,8 @@ import { Job } from 'bull';
 import { UserModel } from 'models/User.model';
 import 'dotenv/config';
 import { NotFoundException } from '@nestjs/common';
+import * as dayjs from 'dayjs';
+
 @Processor('AUTH-QUEUE')
 export class AuthQueueProcessor {
   constructor(private readonly mailService: MailerService) {}
@@ -33,6 +35,39 @@ export class AuthQueueProcessor {
       } else {
         throw new NotFoundException('User tidak ada atau tidak aktif');
       }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  @Process('send-email-verification')
+  async handleSendEmailVerification(job: Job) {
+    const { userId, token } = job.data;
+
+    try {
+      const user = await UserModel.query()
+        .findById(userId)
+        .withGraphFetched('profile');
+
+      if (!user?.email || !token) {
+        throw new NotFoundException('User tidak ditemukan');
+      }
+
+      await this.mailService.sendMail({
+        to: user.email,
+        template: './verify-email',
+        subject: 'PPPI - Verifikasi Data Anggota PPPI',
+        context: {
+          name: user.name || '-',
+          email: user.email || '-',
+          nia: user.nia || '-',
+          date_birth: dayjs().format('DD-MM-YYYY') || '-',
+          address: user.profile?.address || '-',
+          photo: user.profile?.photo || '',
+          link: `${process.env.FRONT_WEB}/verify?token=${token}`,
+        },
+      });
+      console.log('SUCCESS SEND VERIFY EMAIL = ', user.email);
     } catch (error) {
       console.error(error);
     }

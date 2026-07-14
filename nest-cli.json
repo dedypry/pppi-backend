@@ -8,9 +8,9 @@
     "tsConfigPath": "apps/pppi-be-nest/tsconfig.app.json",
     "assets": [
       {
-        "include": "../src/views/**/**",
-        "outDir": "./dist/apps/pppi-be-nest",
-        "watchAssets": false
+        "include": "views/**/*",
+        "outDir": "dist/apps/pppi-be-nest",
+        "watchAssets": true
       }
     ]
   },

@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { BlogCommentModule } from './sockets/blog-comment/blog-comment.module';
 
-@Module({
-  imports: [BlogCommentModule],
-})
+/**
+ * Realtime blog comments moved to Pusher via the main API.
+ * This app remains as a lightweight process for existing PM2 deploy targets.
+ */
+@Module({})
 export class WebsocketModule {}

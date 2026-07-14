@@ -23,4 +23,8 @@ export class PaginationDto {
 
   type?: string;
   user?: number | string;
+
+  @IsOptional()
+  @IsString()
+  verification_status?: string;
 }

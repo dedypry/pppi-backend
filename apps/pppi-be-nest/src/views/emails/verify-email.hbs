@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifikasi Data</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f9;width:100%;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;background:#ffffff;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+          <tr>
+            <td align="center" style="padding:32px 28px 20px;text-align:center;">
+              <h2 style="margin:0 0 16px;color:#222;font-size:24px;line-height:1.3;text-align:center;">
+                Verifikasi Data Anggota PPPI
+              </h2>
+              {{#if photo}}
+              <img src="{{photo}}" alt="Foto Profil" width="96" height="96"
+                style="display:block;margin:0 auto 16px;width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #e8eef5;" />
+              {{/if}}
+              <p style="margin:0 0 12px;color:#555;font-size:14px;line-height:1.6;text-align:center;">
+                Hai <strong>{{name}}</strong>,
+              </p>
+              <p style="margin:0;color:#555;font-size:14px;line-height:1.6;text-align:center;">
+                Silakan verifikasi alamat email akun PPPI Anda dengan klik tombol di bawah.
+                Anda tidak perlu login untuk menyelesaikan proses ini.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 28px 24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f8fafc;border-radius:10px;border:1px solid #e8eef5;">
+                <tr>
+                  <td style="padding:18px 20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;max-width:360px;">
+                      <tr>
+                        <td width="130" align="right" style="padding:6px 8px 6px 0;color:#555;font-size:14px;line-height:1.6;text-align:right;vertical-align:top;white-space:nowrap;">
+                          Nama :
+                        </td>
+                        <td align="left" style="padding:6px 0;color:#222;font-size:14px;line-height:1.6;text-align:left;vertical-align:top;">
+                          <strong>{{name}}</strong>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="130" align="right" style="padding:6px 8px 6px 0;color:#555;font-size:14px;line-height:1.6;text-align:right;vertical-align:top;white-space:nowrap;">
+                          Email :
+                        </td>
+                        <td align="left" style="padding:6px 0;color:#222;font-size:14px;line-height:1.6;text-align:left;vertical-align:top;">
+                          {{email}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="130" align="right" style="padding:6px 8px 6px 0;color:#555;font-size:14px;line-height:1.6;text-align:right;vertical-align:top;white-space:nowrap;">
+                          NIA :
+                        </td>
+                        <td align="left" style="padding:6px 0;color:#222;font-size:14px;line-height:1.6;text-align:left;vertical-align:top;">
+                          {{nia}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="130" align="right" style="padding:6px 8px 6px 0;color:#555;font-size:14px;line-height:1.6;text-align:right;vertical-align:top;white-space:nowrap;">
+                          Tanggal Lahir :
+                        </td>
+                        <td align="left" style="padding:6px 0;color:#222;font-size:14px;line-height:1.6;text-align:left;vertical-align:top;">
+                          {{date_birth}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="130" align="right" style="padding:6px 8px 6px 0;color:#555;font-size:14px;line-height:1.6;text-align:right;vertical-align:top;white-space:nowrap;">
+                          Alamat :
+                        </td>
+                        <td align="left" style="padding:6px 0;color:#222;font-size:14px;line-height:1.6;text-align:left;vertical-align:top;">
+                          {{address}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:0 28px 28px;text-align:center;">
+              <a href="{{link}}"
+                style="display:inline-block;background:#15980d;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:16px;font-weight:bold;text-align:center;">
+                Verifikasi Data Anggota PPPI
+              </a>
+              <p style="margin:20px 0 0;font-size:12px;color:#777;line-height:1.5;text-align:center;">
+                Jika Anda tidak merasa mendaftar di PPPI, abaikan email ini.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
+</html>

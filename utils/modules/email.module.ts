@@ -19,7 +19,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         from: '"PPPI" <noreplypppi@gmail.com>',
       },
       template: {
-        dir: join(process.cwd(), 'dist/apps/pppi-be-nest', 'views/emails'),
+        dir: join(process.cwd(), 'apps/pppi-be-nest', 'src/views/emails'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

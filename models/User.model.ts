@@ -31,6 +31,10 @@ export class UserModel extends Model {
   bio?: string;
   token?: string | null;
   token_at?: string | null;
+  is_need_verify?: boolean;
+  is_verified?: boolean;
+  verification_status?: string;
+  verification_note?: string | null;
 
   @Modifier
   list(query: AnyQueryBuilder) {
@@ -55,6 +59,10 @@ export class UserModel extends Model {
       'sort',
       'users.created_at',
       'bio',
+      'is_need_verify',
+      'is_verified',
+      'verification_status',
+      'verification_note',
     );
   }
 
