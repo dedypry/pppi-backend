@@ -114,6 +114,13 @@ export class MembersService {
       }),
       front_title: body.front_title,
       back_title: body.back_title,
+      ...(Array.isArray(body.job_titles)
+        ? {
+            job_title: JSON.stringify(
+              body.job_titles.map((t) => String(t).trim()).filter(Boolean),
+            ),
+          }
+        : {}),
       profile: {
         id: body.profile_id,
         nik: body.nik,

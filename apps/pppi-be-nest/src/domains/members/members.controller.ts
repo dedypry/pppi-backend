@@ -103,7 +103,19 @@ export class MembersController {
       back_title: user.back_title || '',
       email: user.email || '',
       join_year: user.join_year || '',
-      job_title: user.job_title || '',
+      job_title: (() => {
+        const raw = user.job_title || '';
+        if (!raw) return '';
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            return parsed.filter(Boolean).join(', ');
+          }
+        } catch {
+          // plain string (legacy)
+        }
+        return raw;
+      })(),
       status: user.status || '',
       is_active: user.is_active ? 'Ya' : 'Tidak',
       is_need_verify: user.is_need_verify ? 'Ya' : 'Tidak',

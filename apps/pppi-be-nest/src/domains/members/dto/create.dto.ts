@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsBoolean,
   MaxLength,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -32,6 +33,11 @@ export class MemberCreateDto {
   @IsString()
   @MaxLength(255)
   back_title: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  job_titles?: string[];
 
   @IsString()
   @IsNotEmpty()
