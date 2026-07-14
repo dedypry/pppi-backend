@@ -27,4 +27,8 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   verification_status?: string;
+
+  @IsOptional()
+  @IsString()
+  is_need_verify?: string;
 }

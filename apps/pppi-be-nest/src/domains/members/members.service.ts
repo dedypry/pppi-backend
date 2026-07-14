@@ -26,8 +26,9 @@ import { Queue } from 'bull';
 @Injectable()
 export class MembersService {
   constructor(@InjectQueue('MAIL-QUEUE') private readonly queue: Queue) {}
-  async list(query: PaginationDto) {
-    return await UserModel.query()
+
+  private applyMemberFilters(query: PaginationDto) {
+    return UserModel.query()
       .modify('list')
       .where((builder) => {
         if (query.q) {
@@ -50,6 +51,14 @@ export class MembersService {
           builder.where('verification_status', query.verification_status);
         }
       })
+      .where((builder) => {
+        if (query.is_need_verify === 'yes') {
+          builder.where('is_need_verify', true);
+        }
+        if (query.is_need_verify === 'no') {
+          builder.where('is_need_verify', false);
+        }
+      })
       .modify((builder) => {
         if (query.q) {
           builder
@@ -59,8 +68,18 @@ export class MembersService {
       })
       .withGraphFetched('[profile.[province, city, district] ]')
       .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
-      .orderBy('created_at', 'desc')
-      .page(query.page || 0, query.pageSize || 10);
+      .orderBy('created_at', 'desc');
+  }
+
+  async list(query: PaginationDto) {
+    return await this.applyMemberFilters(query).page(
+      query.page || 0,
+      query.pageSize || 10,
+    );
+  }
+
+  async listForExport(query: PaginationDto) {
+    return await this.applyMemberFilters(query);
   }
 
   async detail(id: number) {
