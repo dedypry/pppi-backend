@@ -50,6 +50,7 @@
     "pluralize": "^8.0.0",
     "puppeteer": "^24.16.0",
     "pusher": "^5.3.4",
+    "react-organizational-chart": "^2.2.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "slugify": "^1.6.6",

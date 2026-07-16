@@ -174,6 +174,224 @@ export class MembersService {
     };
   }
 
+  async kepengurusanTree() {
+    const users = await UserModel.query()
+      .modify('list')
+      .whereNotNull('administrator_role')
+      .whereNot('administrator_role', '')
+      .whereNotNull('region')
+      .whereNot('region', '')
+      .whereExists(UserModel.relatedQuery('roles').where('title', 'member'))
+      .withGraphFetched('profile')
+      .orderBy('name', 'asc');
+
+    const pengurusOrder = ['DPN', 'DPD', 'DC', 'DPC', 'DPR'];
+    const jabatanOrder = [
+      'Ketua',
+      'Wakil',
+      'Sekertaris',
+      'Sekretaris',
+      'Bendahara',
+      'Anggota',
+    ];
+
+    const parseJabatan = (raw?: string | null) => {
+      if (!raw) return 'Anggota';
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed[0]) return String(parsed[0]);
+      } catch {
+        // plain
+      }
+      return String(raw);
+    };
+
+    const pengurusRank = (role: string) => {
+      const code = role.split(' ')[0]?.replace(/[()]/g, '') || role;
+      const idx = pengurusOrder.indexOf(code);
+      return idx === -1 ? 99 : idx;
+    };
+
+    const jabatanRank = (jabatan: string) => {
+      const idx = jabatanOrder.findIndex(
+        (j) => j.toLowerCase() === jabatan.toLowerCase(),
+      );
+      return idx === -1 ? 99 : idx;
+    };
+
+    type Leaf = {
+      id: string;
+      title: string;
+      type: 'user';
+      wilayah: string;
+      pengurus: string;
+      region: string;
+      user: any;
+      children: never[];
+    };
+    type PengurusNode = {
+      id: string;
+      title: string;
+      type: 'pengurus';
+      children: Leaf[];
+    };
+    type WilayahNode = {
+      id: string;
+      title: string;
+      type: 'wilayah';
+      children: PengurusNode[];
+    };
+
+    const byWilayah = new Map<string, Map<string, Leaf[]>>();
+
+    for (const user of users as any[]) {
+      const wilayah = String(user.region || '')
+        .split(' - ')[0]
+        .trim();
+      const pengurus = String(user.administrator_role || '').trim();
+      if (!wilayah || !pengurus) continue;
+
+      const jabatan = parseJabatan(user.job_title);
+      if (!byWilayah.has(wilayah)) byWilayah.set(wilayah, new Map());
+      const byPengurus = byWilayah.get(wilayah)!;
+      if (!byPengurus.has(pengurus)) byPengurus.set(pengurus, []);
+
+      byPengurus.get(pengurus)!.push({
+        id: `user-${user.id}`,
+        title: jabatan,
+        type: 'user',
+        wilayah,
+        pengurus,
+        region: String(user.region || ''),
+        user,
+        children: [],
+      });
+    }
+
+    const tree: WilayahNode[] = [...byWilayah.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([wilayah, pengurusMap]) => ({
+        id: `wilayah-${wilayah}`,
+        title: wilayah,
+        type: 'wilayah' as const,
+        children: [...pengurusMap.entries()]
+          .sort(([a], [b]) => pengurusRank(a) - pengurusRank(b))
+          .map(([pengurus, leaves]) => ({
+            id: `pengurus-${wilayah}-${pengurus}`,
+            title: pengurus,
+            type: 'pengurus' as const,
+            children: leaves.sort(
+              (a, b) => jabatanRank(a.title) - jabatanRank(b.title),
+            ),
+          })),
+      }));
+
+    return tree;
+  }
+
+  async replaceKepengurusan(body: {
+    from_user_id: number;
+    to_user_id: number;
+    region: string;
+    administrator_role: string;
+    jabatan: string;
+  }) {
+    const fromId = Number(body.from_user_id);
+    const toId = Number(body.to_user_id);
+
+    if (!fromId || !toId) {
+      throw new ForbiddenException('User asal dan tujuan wajib diisi');
+    }
+    if (!body.region || !body.administrator_role || !body.jabatan) {
+      throw new ForbiddenException('Wilayah, pengurus, dan jabatan wajib diisi');
+    }
+
+    const [fromUser, toUser] = await Promise.all([
+      UserModel.query().findById(fromId),
+      UserModel.query().findById(toId),
+    ]);
+
+    if (!fromUser) throw new NotFoundException('User lama tidak ditemukan');
+    if (!toUser) throw new NotFoundException('User baru tidak ditemukan');
+
+    const jobTitle = JSON.stringify([String(body.jabatan).trim()]);
+
+    await toUser.$query().patch({
+      region: body.region,
+      administrator_role: body.administrator_role,
+      job_title: jobTitle,
+    });
+
+    if (fromId !== toId) {
+      await fromUser.$query().patch({
+        region: null as any,
+        administrator_role: null as any,
+        job_title: null as any,
+      });
+    }
+
+    return 'Kepengurusan berhasil diganti';
+  }
+
+  private verificationLabel(status?: string | null) {
+    switch (status) {
+      case 'pending':
+        return 'Email Terkirim';
+      case 're_verified':
+        return 'Re Verified';
+      case 'submitted':
+        return 'Menunggu Approve';
+      case 'approved':
+        return 'Terverifikasi';
+      case 'rejected':
+        return 'Ditolak';
+      default:
+        return 'Belum Dikirim';
+    }
+  }
+
+  async kepengurusanExportRows() {
+    const tree = await this.kepengurusanTree();
+    const rows: Array<{
+      wilayah: string;
+      pengurus: string;
+      jabatan: string;
+      nama: string;
+      nia: string;
+      email: string;
+      phone: string;
+      verification_status: string;
+      status: string;
+    }> = [];
+
+    for (const wilayah of tree) {
+      for (const pengurus of wilayah.children || []) {
+        for (const leaf of pengurus.children || []) {
+          const user = leaf.user || {};
+          const nama = [user.front_title, user.name, user.back_title]
+            .filter(Boolean)
+            .join(' ');
+
+          rows.push({
+            wilayah: wilayah.title,
+            pengurus: pengurus.title,
+            jabatan: leaf.title,
+            nama,
+            nia: formatNia(user?.nia != null ? String(user.nia) : '') || '',
+            email: user.email || '',
+            phone: user.profile?.phone || '',
+            verification_status: this.verificationLabel(
+              user.verification_status,
+            ),
+            status: user.status || '',
+          });
+        }
+      }
+    }
+
+    return rows;
+  }
+
   async listForExport(query: PaginationDto) {
     return await this.applyMemberFilters(query);
   }

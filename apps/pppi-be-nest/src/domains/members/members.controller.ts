@@ -53,6 +53,80 @@ export class MembersController {
     return this.membersService.filterOptions();
   }
 
+  @Get('kepengurusan/export')
+  @UseGuards(AuthGuard)
+  async kepengurusanExport(@Res() res: Response) {
+    const rows = await this.membersService.kepengurusanExportRows();
+
+    return this.excelJsService.download({
+      name: `kepengurusan-${dayjs().format('YYYYMMDD-HHmmss')}`,
+      headers: [
+        { header: 'Wilayah', key: 'wilayah', width: 28 },
+        { header: 'Pengurus', key: 'pengurus', width: 28 },
+        { header: 'Jabatan', key: 'jabatan', width: 16 },
+        { header: 'Nama', key: 'nama', width: 32 },
+        { header: 'NIA', key: 'nia', width: 20, style: { numFmt: '@' } },
+        { header: 'Email', key: 'email', width: 28 },
+        { header: 'Phone', key: 'phone', width: 16 },
+        { header: 'Status Verifikasi', key: 'verification_status', width: 18 },
+        { header: 'Status Anggota', key: 'status', width: 14 },
+      ],
+      body: rows,
+      res,
+      worksheetFn: (worksheet) => {
+        const niaCol = worksheet.getColumn('nia');
+        if (niaCol) {
+          niaCol.numFmt = '@';
+          niaCol.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+            if (rowNumber === 1) return;
+            if (cell.value != null) {
+              cell.value = String(cell.value);
+              cell.numFmt = '@';
+            }
+          });
+        }
+      },
+    });
+  }
+
+  @Get('kepengurusan/export-pdf')
+  @UseGuards(AuthGuard)
+  async kepengurusanExportPdf(@Res() res: Response) {
+    const rows = await this.membersService.kepengurusanExportRows();
+    const html = await getHtmlContent('kepengurusan', {
+      rows: rows.map((row, index) => ({ ...row, no: index + 1 })),
+      generated_at: dayjs().format('DD-MM-YYYY HH:mm'),
+      total: rows.length,
+    });
+
+    await this.pdfService.downloadPdf({
+      htmlContent: html,
+      res,
+      name: `kepengurusan-${dayjs().format('YYYYMMDD-HHmmss')}`,
+      landscape: true,
+    });
+  }
+
+  @Get('kepengurusan')
+  kepengurusan() {
+    return this.membersService.kepengurusanTree();
+  }
+
+  @Patch('kepengurusan/replace')
+  @UseGuards(AuthGuard)
+  replaceKepengurusan(
+    @Body()
+    body: {
+      from_user_id: number;
+      to_user_id: number;
+      region: string;
+      administrator_role: string;
+      jabatan: string;
+    },
+  ) {
+    return this.membersService.replaceKepengurusan(body);
+  }
+
   @Get('export')
   @UseGuards(AuthGuard)
   async export(@Res() res: Response, @Query() query: PaginationDto) {
