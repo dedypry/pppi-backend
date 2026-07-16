@@ -52,7 +52,16 @@ export class MembersService {
           query.verification_status &&
           query.verification_status !== 'all'
         ) {
-          builder.where('verification_status', query.verification_status);
+          if (query.verification_status === 'not_sent') {
+            builder.where((qb) => {
+              qb.whereNull('verification_status').orWhere(
+                'verification_status',
+                '',
+              );
+            });
+          } else {
+            builder.where('verification_status', query.verification_status);
+          }
         }
       })
       .where((builder) => {
