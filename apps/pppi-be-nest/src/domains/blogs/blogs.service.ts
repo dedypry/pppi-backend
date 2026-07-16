@@ -79,7 +79,6 @@ export class BlogsService {
       .orderBy('created_at', 'DESC')
       .where((builder) => {
         if (query?.user && query.user != 'undefined') {
-          console.log('QUERY', query);
           builder.where('writer_id', query.user);
         }
       })
@@ -145,7 +144,6 @@ export class BlogsService {
     let sl = Slug(slug);
     const blog = await BlogModel.query().findOne('slug', sl);
 
-    console.log('BLOG', blog?.slug, sl);
     if (blog) {
       sl = await this.generateSlug(`${slug}-${generateRandomString(4)}`);
     }

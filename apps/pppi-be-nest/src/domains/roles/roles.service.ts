@@ -13,7 +13,6 @@ import { AnyQueryBuilder } from 'objection';
 @Injectable()
 export class RolesService {
   async list(query: PaginationDto) {
-    console.log('QUERY', query);
     const roles = RoleModel.query()
       .withGraphFetched('users(userLisr)')
       .modifiers({
@@ -43,7 +42,6 @@ export class RolesService {
     });
 
     if (body?.user_id?.length && role?.id) {
-      console.log('MASUK', body);
       const roleId = role.id;
       await role?.$relatedQuery('users').for(roleId).unrelate();
       await role?.$relatedQuery('users').for(roleId).relate(body?.user_id);

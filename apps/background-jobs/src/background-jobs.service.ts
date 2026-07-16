@@ -27,7 +27,6 @@ export class BackgroundJobsService {
         .whereNull('profile.photo')
         .first();
 
-      // console.log(user);
       if (user) {
         const photo = await getImageFromUrl(body.profile.photo);
         const member_payment_file = await getImageFromUrl(
@@ -39,13 +38,10 @@ export class BackgroundJobsService {
           photo,
           member_payment_file,
         });
-        console.log('SUCCESS');
       }
       // const body = item.data;
 
       // const ttl = toIsoString(body.profile.date_birth);
-
-      // console.log('TTL', toIsoString(body.profile.date_birth));
 
       // if (ttl) {
       //   await this.createUserAuto(
@@ -68,7 +64,6 @@ export class BackgroundJobsService {
       //     });
       // }
     }
-    console.log('JALAN', cron.total);
   }
 
   async createUserAuto(
@@ -103,7 +98,6 @@ export class BackgroundJobsService {
           status: 'success',
         });
 
-        console.log('SUCCESS CREATE USER');
         return profileD;
       });
 

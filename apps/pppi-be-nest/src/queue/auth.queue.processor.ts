@@ -31,7 +31,6 @@ export class AuthQueueProcessor {
             link: `${process.env.FRONT_WEB}/reset-password/${user?.token}`,
           },
         });
-        console.log('SUCCESS SEND EMAIL = ', user?.email);
       } else {
         throw new NotFoundException('User tidak ada atau tidak aktif');
       }
@@ -67,7 +66,6 @@ export class AuthQueueProcessor {
           link: `${process.env.FRONT_WEB}/verify?token=${token}`,
         },
       });
-      console.log('SUCCESS SEND VERIFY EMAIL = ', user.email);
     } catch (error) {
       console.error(error);
     }

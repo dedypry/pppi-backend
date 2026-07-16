@@ -51,7 +51,6 @@ export function destroyFile({ url, urls }: IDeleteFile) {
       method: 'DELETE',
       data: { url, urls },
     })
-      .then(({ data }) => console.log(data))
       .catch((err) => err?.response?.data);
   }
 }

@@ -11,7 +11,6 @@ const AVAILABLE_MODELS = [
 ];
 
 export async function generateAI(prompt: any) {
-  console.log('LAGI DI PROSES...');
   let res = '';
   for (const model of AVAILABLE_MODELS) {
     const ai = genAI.getGenerativeModel({ model });
@@ -21,6 +20,5 @@ export async function generateAI(prompt: any) {
     break;
   }
 
-  console.log('SELESAI...');
   return res;
 }

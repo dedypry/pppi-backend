@@ -83,7 +83,6 @@ export function parseTempatTanggal(str: string) {
 
     return { tempat, tanggal };
   } catch (error) {
-    console.log(error);
     return {
       tempat: str,
       tanggal: str,

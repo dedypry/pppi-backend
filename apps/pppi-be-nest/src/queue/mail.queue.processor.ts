@@ -48,7 +48,6 @@ export class MailQueueProcessor {
           ],
         });
 
-        console.log('SUCCESS SEND EMAIL = ', email);
       }
     } catch (error) {
       console.error('ERROR', error);
@@ -71,7 +70,6 @@ export class MailQueueProcessor {
   //           link: `${process.env.FRONT_WEB}/reset-password/${user?.token}`,
   //         },
   //       });
-  //       console.log('SUCCESS SEND EMAIL = ', user?.email);
   //     } else {
   //       console.error('user not found');
   //     }

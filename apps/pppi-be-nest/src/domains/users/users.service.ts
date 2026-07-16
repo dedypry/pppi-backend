@@ -70,8 +70,6 @@ export class UsersService {
 
     await user.$query().delete();
 
-    console.log(userId);
-
     return 'User berhasil di hapus';
   }
 

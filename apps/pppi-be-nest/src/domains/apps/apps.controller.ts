@@ -8,7 +8,6 @@ export class AppsController {
 
   @Get()
   getApp(@Query('key') key: string) {
-    console.log('APP', key);
     return this.appsService.list(key);
   }
 

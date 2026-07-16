@@ -55,8 +55,4 @@ export async function seed(knex: Knex): Promise<void> {
       console.warn(`User id ${userId} not found, skipped`);
     }
   }
-
-  console.log(
-    `update_user_from_form_results: updated=${updated}, skipped=${skipped}, total=${results.length}`,
-  );
 }

@@ -41,8 +41,6 @@ export class BannersService {
 
     if (!banner) throw new NotFoundException();
 
-    console.log('B', body);
-
     await banner.$query().update({
       is_active: body?.status,
     });
@@ -58,7 +56,6 @@ export class BannersService {
       await banner.$query().delete();
     }
 
-    console.log('URL', urls);
     destroyFile({ urls });
 
     return 'Banner berhasil di hapus';

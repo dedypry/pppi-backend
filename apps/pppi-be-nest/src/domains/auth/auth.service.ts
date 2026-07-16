@@ -48,7 +48,6 @@ export class AuthService {
       throw new NotFoundException('User Not Found');
     }
 
-    console.log('BODY', body.password, user?.password);
     const match = comparePassword(body.password, user?.password);
 
     if (!match) throw new BadRequestException('Password Not Match');

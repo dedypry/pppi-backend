@@ -659,7 +659,6 @@ export class MembersService {
     }
 
     if (body?.password) {
-      console.log('MASUK ganti password');
       await user.$query().update({
         password: hashPassword(body.password),
       });
