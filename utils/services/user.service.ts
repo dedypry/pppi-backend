@@ -28,10 +28,14 @@ export async function generateNia(data: IGenNia) {
   const province = await ProvinceModel.query().findById(data.provinceId);
   const city = await CityModel.query().findById(data.cityId);
   const { max }: any = await UserModel.query()
-    .max(raw("CAST(NULLIF(split_part(nia, '.', 5), '') AS INTEGER)"))
+    .max(
+      raw(
+        "CAST(NULLIF(RIGHT(REPLACE(COALESCE(nia, ''), '.', ''), 4), '') AS INTEGER)",
+      ),
+    )
     .first();
 
-  const sortNumber = max + 1;
+  const sortNumber = (max || 0) + 1;
 
   const year = data.joinYear || dayjs().format('YY');
   const birtDate = dayjs(data.dateBirth).format('YY');
@@ -61,7 +65,8 @@ export async function generateNia(data: IGenNia) {
 
 async function generateSimpleNia(data: IGenNiaSimple) {
   const sortNumber = String(data.sortNumber).padStart(4, '0');
-  let nia = `${data.year}.${data.provinceCode}.${data.cityCode}.${data.birtDate}.${sortNumber}`;
+  // Stored without dots: YYPPCCBBSSSS (display: YY.PP.CC.BB.SSSS)
+  let nia = `${data.year}${data.provinceCode}${data.cityCode}${data.birtDate}${sortNumber}`;
 
   const checkNia = await UserModel.query().findOne('nia', nia);
 
@@ -73,4 +78,25 @@ async function generateSimpleNia(data: IGenNiaSimple) {
   }
 
   return nia;
+}
+
+/** Format stored NIA (261616260190) for display (26.16.16.26.0190). */
+export function formatNia(nia?: string | null): string {
+  if (nia === null || nia === undefined || nia === '') return '';
+  const raw = String(nia).replace(/\./g, '').trim();
+  if (!raw) return '';
+  if (raw.length >= 12) {
+    return `${raw.slice(0, 2)}.${raw.slice(2, 4)}.${raw.slice(4, 6)}.${raw.slice(6, 8)}.${raw.slice(8, 12)}`;
+  }
+  if (raw.length >= 10) {
+    return `${raw.slice(0, 2)}.${raw.slice(2, 4)}.${raw.slice(4, 6)}.${raw.slice(6)}`;
+  }
+  if (String(nia).includes('.')) return String(nia).trim();
+  return raw;
+}
+
+/** Normalize NIA input to storage form (no dots). */
+export function normalizeNia(nia?: string | null): string {
+  if (!nia) return '';
+  return String(nia).replace(/\./g, '').trim();
 }

@@ -14,6 +14,7 @@ export class UserModel extends Model {
   name?: string;
   back_title?: string;
   nia?: string;
+  nia_renew_count?: number;
   job_title?: string;
   email?: string;
   password?: string;
@@ -35,6 +36,8 @@ export class UserModel extends Model {
   is_verified?: boolean;
   verification_status?: string;
   verification_note?: string | null;
+  region?: string;
+  administrator_role?: string;
 
   @Modifier
   list(query: AnyQueryBuilder) {
@@ -46,7 +49,10 @@ export class UserModel extends Model {
       'front_title',
       'back_title',
       'nia',
+      'nia_renew_count',
       'job_title',
+      'region',
+      'administrator_role',
       'last_login',
       'is_active',
       'is_organization',

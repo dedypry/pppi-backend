@@ -141,9 +141,10 @@ export class FormService {
     if (!form) throw new NotFoundException();
     let user: UserModel | undefined = undefined;
     if (form.member_required) {
+      const nia = String(body.nia || '').replace(/\./g, '').trim();
       user = await UserModel.query()
-        .where('nia', body.nia)
-        .orWhereRaw(`REPLACE(nia,'.','') = ?`, [body.nia])
+        .where('nia', nia)
+        .orWhereRaw(`REPLACE(nia,'.','') = ?`, [nia])
         .first();
 
       if (!user) throw new NotFoundException('signup');

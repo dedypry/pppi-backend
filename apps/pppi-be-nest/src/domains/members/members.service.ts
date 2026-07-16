@@ -11,9 +11,13 @@ import { hashPassword } from 'utils/helpers/bcrypt';
 import { PaginationDto } from 'utils/dto/pagination.dto';
 import { RoleModel } from 'models/Role.model';
 import MemberApprovedDto from './dto/approved.dto';
-import { fn } from 'objection';
+import { fn, raw } from 'objection';
 import { FileModel } from 'models/File.model';
-import { generateNia } from 'utils/services/user.service';
+import {
+  formatNia,
+  generateNia,
+  normalizeNia,
+} from 'utils/services/user.service';
 import { IExportMember } from 'utils/interfaces/member.interface';
 import { parseTempatTanggal } from 'utils/helpers/global';
 import { customFormat, getYear, toIsoString } from 'utils/helpers/date-format';
@@ -59,6 +63,40 @@ export class MembersService {
           builder.where('is_need_verify', false);
         }
       })
+      .where((builder) => {
+        if (query.administrator_role && query.administrator_role !== 'all') {
+          if (query.administrator_role === 'has_pengurus') {
+            builder
+              .whereNotNull('administrator_role')
+              .whereNot('administrator_role', '');
+          } else if (query.administrator_role === 'no_pengurus') {
+            builder.where((qb) => {
+              qb.whereNull('administrator_role').orWhere(
+                'administrator_role',
+                '',
+              );
+            });
+          } else {
+            builder.where('administrator_role', query.administrator_role);
+          }
+        }
+      })
+      .where((builder) => {
+        if (query.region && query.region !== 'all') {
+          builder.whereRaw(`SPLIT_PART(region, ' - ', 1) = ?`, [query.region]);
+        }
+      })
+      .where((builder) => {
+        if (query.jabatan && query.jabatan !== 'all') {
+          // job_title may be JSON array string or plain text
+          builder.where((qb) => {
+            qb.where('job_title', query.jabatan!).orWhereRaw(
+              `job_title ILIKE ?`,
+              [`%"${query.jabatan}"%`],
+            );
+          });
+        }
+      })
       .modify((builder) => {
         if (query.q) {
           builder
@@ -76,6 +114,64 @@ export class MembersService {
       query.page || 0,
       query.pageSize || 10,
     );
+  }
+
+  async filterOptions() {
+    const memberScope = () =>
+      UserModel.query().whereExists(
+        UserModel.relatedQuery('roles').where('title', 'member'),
+      );
+
+    const [roleRows, regionRows, jobTitleRows] = await Promise.all([
+      memberScope()
+        .distinct('administrator_role')
+        .select('administrator_role')
+        .whereNotNull('administrator_role')
+        .whereNot('administrator_role', '')
+        .orderBy('administrator_role', 'asc'),
+      memberScope()
+        .whereNotNull('region')
+        .whereNot('region', '')
+        .select(
+          raw(`DISTINCT TRIM(SPLIT_PART(region, ' - ', 1)) as region_prefix`),
+        )
+        .orderBy('region_prefix', 'asc'),
+      memberScope()
+        .distinct('job_title')
+        .select('job_title')
+        .whereNotNull('job_title')
+        .whereNot('job_title', ''),
+    ]);
+
+    const jabatanSet = new Set<string>();
+    for (const row of jobTitleRows as Array<{ job_title?: string }>) {
+      const jobTitle = row.job_title;
+      if (!jobTitle) continue;
+      try {
+        const parsed = JSON.parse(jobTitle);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((t) => {
+            const val = String(t).trim();
+            if (val) jabatanSet.add(val);
+          });
+          continue;
+        }
+      } catch {
+        // plain string
+      }
+      const val = String(jobTitle).trim();
+      if (val) jabatanSet.add(val);
+    }
+
+    return {
+      administrator_roles: (roleRows as Array<{ administrator_role?: string }>)
+        .map((r) => r.administrator_role)
+        .filter(Boolean) as string[],
+      regions: (regionRows as Array<{ region_prefix?: string }>)
+        .map((r) => r.region_prefix)
+        .filter(Boolean) as string[],
+      jabatan: Array.from(jabatanSet).sort((a, b) => a.localeCompare(b)),
+    };
   }
 
   async listForExport(query: PaginationDto) {
@@ -167,14 +263,14 @@ export class MembersService {
     if (!member) throw new NotFoundException();
     let nia = '';
     if (body.nia) {
-      const checkNia = await UserModel.query().findOne('nia', body.nia);
+      nia = normalizeNia(body.nia);
+      const checkNia = await UserModel.query().findOne('nia', nia);
 
       if (checkNia) {
         throw new ForbiddenException(
           `Nia Sudah Tersedia di user ${checkNia.name}`,
         );
       }
-      nia = body.nia;
     } else {
       if (body.approved) {
         const generate = await generateNia({
@@ -211,6 +307,74 @@ export class MembersService {
       this.queue.add('send-kta', { userId: id });
     }
     return 'Member berhasil di update';
+  }
+
+  async renewNia(id: number) {
+    const member = await UserModel.query()
+      .withGraphFetched('profile')
+      .findById(id);
+
+    if (!member) throw new NotFoundException('Member tidak ditemukan');
+    if (member.status !== 'approved') {
+      throw new ForbiddenException(
+        'NIA hanya bisa diperbaharui untuk anggota yang sudah disetujui',
+      );
+    }
+    if (!member.profile?.province_id || !member.profile?.city_id) {
+      throw new ForbiddenException(
+        'Provinsi dan kota anggota harus diisi terlebih dahulu',
+      );
+    }
+
+    const generate = await generateNia({
+      provinceId: member.profile.province_id,
+      cityId: member.profile.city_id,
+      dateBirth: member.profile.date_birth!,
+      joinYear: Number(member.join_year),
+    });
+
+    const renewCount = Number(member.nia_renew_count || 0) + 1;
+
+    await member.$query().update({
+      nia: generate.nia,
+      sort: generate.sort,
+      nia_renew_count: renewCount,
+    });
+
+    return {
+      message: `NIA berhasil diperbaharui menjadi ${formatNia(generate.nia)}`,
+      nia: generate.nia,
+      nia_formatted: formatNia(generate.nia),
+      nia_renew_count: renewCount,
+    };
+  }
+
+  async renewNiaBulk(ids: number[]) {
+    const uniqueIds = [...new Set((ids || []).map(Number).filter(Boolean))];
+    if (!uniqueIds.length) {
+      throw new ForbiddenException('Pilih minimal 1 anggota');
+    }
+
+    let success = 0;
+    const failed: Array<{ id: number; reason: string }> = [];
+
+    for (const id of uniqueIds) {
+      try {
+        await this.renewNia(id);
+        success += 1;
+      } catch (err: any) {
+        failed.push({
+          id,
+          reason: err?.message || 'Gagal memperbaharui NIA',
+        });
+      }
+    }
+
+    return {
+      message: `NIA diperbaharui: ${success} berhasil${failed.length ? `, ${failed.length} gagal` : ''}`,
+      success,
+      failed,
+    };
   }
 
   async memberSetting(body: UpdateSettingDto, id: number) {

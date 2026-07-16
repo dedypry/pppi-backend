@@ -1,8 +1,10 @@
 import { join } from 'path';
 import { readFile } from 'fs/promises';
 import Handlebars from 'handlebars';
+import { formatNia } from 'utils/services/user.service';
 
 Handlebars.registerHelper('upper', (val: string) => val.toUpperCase());
+Handlebars.registerHelper('formatNia', (val: string) => formatNia(val));
 
 export async function getHtmlContent(
   templateName: string,

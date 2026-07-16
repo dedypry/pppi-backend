@@ -28,6 +28,7 @@ import { UpdateSettingDto } from './dto/update.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import * as dayjs from 'dayjs';
+import { formatNia } from 'utils/services/user.service';
 
 @Controller('members')
 export class MembersController {
@@ -46,20 +47,28 @@ export class MembersController {
     return this.membersService.list(query);
   }
 
+  @Get('filter-options')
+  @UseGuards(AuthGuard)
+  filterOptions() {
+    return this.membersService.filterOptions();
+  }
+
   @Get('export')
   @UseGuards(AuthGuard)
   async export(@Res() res: Response, @Query() query: PaginationDto) {
     const members = await this.membersService.listForExport(query);
 
-    const headers = [
+    const allHeaders = [
       { header: 'ID', key: 'id', width: 8 },
-      { header: 'NIA', key: 'nia', width: 18 },
+      { header: 'NIA', key: 'nia', width: 20, style: { numFmt: '@' } },
       { header: 'Gelar Depan', key: 'front_title', width: 14 },
       { header: 'Nama', key: 'name', width: 28 },
       { header: 'Gelar Belakang', key: 'back_title', width: 14 },
       { header: 'Email', key: 'email', width: 28 },
       { header: 'Tahun Bergabung', key: 'join_year', width: 14 },
-      { header: 'Job Title', key: 'job_title', width: 18 },
+      { header: 'Jabatan', key: 'job_title', width: 18 },
+      { header: 'Pengurus', key: 'administrator_role', width: 28 },
+      { header: 'Wilayah', key: 'region', width: 36 },
       { header: 'Status', key: 'status', width: 14 },
       { header: 'Aktif', key: 'is_active', width: 10 },
       { header: 'Butuh Verifikasi', key: 'is_need_verify', width: 16 },
@@ -95,72 +104,126 @@ export class MembersController {
       { header: 'Created At', key: 'created_at', width: 18 },
     ];
 
-    const body = members.map((user: any) => ({
-      id: user.id,
-      nia: user.nia || '',
-      front_title: user.front_title || '',
-      name: user.name || '',
-      back_title: user.back_title || '',
-      email: user.email || '',
-      join_year: user.join_year || '',
-      job_title: (() => {
-        const raw = user.job_title || '';
-        if (!raw) return '';
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            return parsed.filter(Boolean).join(', ');
-          }
-        } catch {
-          // plain string (legacy)
+    const selectedKeys = (query.fields || '')
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean);
+    const headerMap = new Map(allHeaders.map((h) => [h.key, h]));
+    const headers =
+      selectedKeys.length > 0
+        ? selectedKeys
+            .map((key) => headerMap.get(key))
+            .filter(Boolean)
+        : allHeaders;
+
+    const parseJobTitle = (raw?: string) => {
+      if (!raw) return '';
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(Boolean).join(', ');
         }
-        return raw;
-      })(),
-      status: user.status || '',
-      is_active: user.is_active ? 'Ya' : 'Tidak',
-      is_need_verify: user.is_need_verify ? 'Ya' : 'Tidak',
-      is_verified: user.is_verified ? 'Ya' : 'Tidak',
-      verification_status: user.verification_status || '',
-      verification_note: user.verification_note || '',
-      nik: user.profile?.nik || '',
-      place_birth: user.profile?.place_birth || '',
-      date_birth: user.profile?.date_birth
-        ? dayjs(user.profile.date_birth).format('DD-MM-YYYY')
-        : '',
-      gender: user.profile?.gender || '',
-      citizenship: user.profile?.citizenship || '',
-      phone: user.profile?.phone || '',
-      address: user.profile?.address || '',
-      province: user.profile?.province?.name || '',
-      city: user.profile?.city?.name || '',
-      district: user.profile?.district?.name || '',
-      last_education_nursing: user.profile?.last_education_nursing || '',
-      last_education: user.profile?.last_education || '',
-      workplace: user.profile?.workplace || '',
-      hope_in: user.profile?.hope_in || '',
-      contribution: user.profile?.contribution || '',
-      is_member_payment: user.profile?.is_member_payment ? 'Ya' : 'Tidak',
-      reason_reject: user.profile?.reason_reject || '',
-      photo: user.profile?.photo || '',
-      member_payment_file: user.profile?.member_payment_file || '',
-      approved_at: user.approved_at
-        ? dayjs(user.approved_at).format('DD-MM-YYYY HH:mm')
-        : '',
-      rejected_at: user.rejected_at
-        ? dayjs(user.rejected_at).format('DD-MM-YYYY HH:mm')
-        : '',
-      rejected_note: user.rejected_note || '',
-      created_at: user.created_at
-        ? dayjs(user.created_at).format('DD-MM-YYYY HH:mm')
-        : '',
-    }));
+      } catch {
+        // plain string
+      }
+      return raw;
+    };
+
+    const body = members.map((user: any) => {
+      const row: Record<string, any> = {
+        id: user.id,
+        nia: formatNia(user?.nia != null ? String(user.nia) : '') || '',
+        front_title: user.front_title || '',
+        name: user.name || '',
+        back_title: user.back_title || '',
+        email: user.email || '',
+        join_year: user.join_year || '',
+        job_title: parseJobTitle(user.job_title),
+        administrator_role: user.administrator_role || '',
+        region: user.region || '',
+        status: user.status || '',
+        is_active: user.is_active ? 'Ya' : 'Tidak',
+        is_need_verify: user.is_need_verify ? 'Ya' : 'Tidak',
+        is_verified: user.is_verified ? 'Ya' : 'Tidak',
+        verification_status: user.verification_status || '',
+        verification_note: user.verification_note || '',
+        nik: user.profile?.nik || '',
+        place_birth: user.profile?.place_birth || '',
+        date_birth: user.profile?.date_birth
+          ? dayjs(user.profile.date_birth).format('DD-MM-YYYY')
+          : '',
+        gender: user.profile?.gender || '',
+        citizenship: user.profile?.citizenship || '',
+        phone: user.profile?.phone || '',
+        address: user.profile?.address || '',
+        province: user.profile?.province?.name || '',
+        city: user.profile?.city?.name || '',
+        district: user.profile?.district?.name || '',
+        last_education_nursing: user.profile?.last_education_nursing || '',
+        last_education: user.profile?.last_education || '',
+        workplace: user.profile?.workplace || '',
+        hope_in: user.profile?.hope_in || '',
+        contribution: user.profile?.contribution || '',
+        is_member_payment: user.profile?.is_member_payment ? 'Ya' : 'Tidak',
+        reason_reject: user.profile?.reason_reject || '',
+        photo: user.profile?.photo || '',
+        member_payment_file: user.profile?.member_payment_file || '',
+        approved_at: user.approved_at
+          ? dayjs(user.approved_at).format('DD-MM-YYYY HH:mm')
+          : '',
+        rejected_at: user.rejected_at
+          ? dayjs(user.rejected_at).format('DD-MM-YYYY HH:mm')
+          : '',
+        rejected_note: user.rejected_note || '',
+        created_at: user.created_at
+          ? dayjs(user.created_at).format('DD-MM-YYYY HH:mm')
+          : '',
+      };
+
+      if (selectedKeys.length === 0) return row;
+
+      return Object.fromEntries(
+        selectedKeys.filter((k) => k in row).map((k) => [k, row[k]]),
+      );
+    });
 
     return this.excelJsService.download({
       name: `members-${dayjs().format('YYYYMMDD-HHmmss')}`,
-      headers,
+      headers: headers as any,
       body,
       res,
+      worksheetFn: (worksheet) => {
+        const niaCol = worksheet.getColumn('nia');
+        if (niaCol) {
+          niaCol.numFmt = '@';
+          niaCol.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+            if (rowNumber === 1) return;
+            if (cell.value != null) {
+              cell.value = String(cell.value);
+              cell.numFmt = '@';
+            }
+          });
+        }
+      },
     });
+  }
+
+  @Patch('settings/:id')
+  @UseGuards(AuthGuard)
+  memberSetting(@Param('id') id: number, @Body() body: UpdateSettingDto) {
+    return this.membersService.memberSetting(body, id);
+  }
+
+  @Post('renew-nia')
+  @UseGuards(AuthGuard)
+  renewNiaBulk(@Body() body: { ids: number[] }) {
+    return this.membersService.renewNiaBulk(body.ids || []);
+  }
+
+  @Patch(':id/renew-nia')
+  @UseGuards(AuthGuard)
+  renewNia(@Param('id') id: number) {
+    return this.membersService.renewNia(id);
   }
 
   @Get(':id')
@@ -182,11 +245,6 @@ export class MembersController {
     @Req() req: any,
   ) {
     return this.membersService.updateApproved(body, id, req['user']['id']);
-  }
-  @Patch('settings/:id')
-  @UseGuards(AuthGuard)
-  memberSetting(@Param('id') id: number, @Body() body: UpdateSettingDto) {
-    return this.membersService.memberSetting(body, id);
   }
 
   @Get('download/:id')

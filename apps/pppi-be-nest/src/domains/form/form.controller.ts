@@ -22,6 +22,7 @@ import { AuthGuard } from 'guard/auth.guard';
 import { PaginationDto } from 'utils/dto/pagination.dto';
 import { ExcelJsService } from 'utils/services/exceljs.service';
 import { Response } from 'express';
+import { formatNia } from 'utils/services/user.service';
 
 @Controller('form')
 export class FormController {
@@ -62,7 +63,7 @@ export class FormController {
         form.member_required
           ? {
               ...(e.value as any),
-              nia: e.nia,
+              nia: formatNia(e.nia),
               name: `${e.user?.front_title} ${e.name} ${e.user?.back_title}`,
             }
           : (e.value as any),

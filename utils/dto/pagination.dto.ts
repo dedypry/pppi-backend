@@ -31,4 +31,21 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   is_need_verify?: string;
+
+  @IsOptional()
+  @IsString()
+  administrator_role?: string;
+
+  @IsOptional()
+  @IsString()
+  region?: string;
+
+  @IsOptional()
+  @IsString()
+  jabatan?: string;
+
+  /** Comma-separated export column keys, e.g. "nia,name,region" */
+  @IsOptional()
+  @IsString()
+  fields?: string;
 }
