@@ -54,7 +54,6 @@ export class MembersController {
   }
 
   @Get('kepengurusan/export')
-  @UseGuards(AuthGuard)
   async kepengurusanExport(@Res() res: Response) {
     const rows = await this.membersService.kepengurusanExportRows();
 
@@ -90,7 +89,6 @@ export class MembersController {
   }
 
   @Get('kepengurusan/export-pdf')
-  @UseGuards(AuthGuard)
   async kepengurusanExportPdf(@Res() res: Response) {
     const rows = await this.membersService.kepengurusanExportRows();
     const html = await getHtmlContent('kepengurusan', {
