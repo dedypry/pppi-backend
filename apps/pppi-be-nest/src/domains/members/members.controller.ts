@@ -2,6 +2,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -137,6 +138,12 @@ export class MembersController {
     },
   ) {
     return this.membersService.replaceKepengurusan(body);
+  }
+
+  @Delete('kepengurusan/:userId')
+  @UseGuards(AuthGuard)
+  removeKepengurusan(@Param('userId') userId: number) {
+    return this.membersService.removeKepengurusan(Number(userId));
   }
 
   @Get('export')

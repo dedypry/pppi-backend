@@ -369,6 +369,23 @@ export class MembersService {
     return 'Kepengurusan berhasil diganti';
   }
 
+  async removeKepengurusan(userId: number) {
+    if (!userId) {
+      throw new ForbiddenException('User wajib diisi');
+    }
+
+    const user = await UserModel.query().findById(userId);
+    if (!user) throw new NotFoundException('User tidak ditemukan');
+
+    await user.$query().patch({
+      region: null as any,
+      administrator_role: null as any,
+      job_title: null as any,
+    });
+
+    return 'Kepengurusan berhasil dihapus';
+  }
+
   private verificationLabel(status?: string | null) {
     switch (status) {
       case 'pending':
