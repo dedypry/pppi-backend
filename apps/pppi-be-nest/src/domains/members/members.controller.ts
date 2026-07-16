@@ -110,6 +110,20 @@ export class MembersController {
     return this.membersService.kepengurusanTree();
   }
 
+  @Post('kepengurusan')
+  @UseGuards(AuthGuard)
+  createKepengurusan(
+    @Body()
+    body: {
+      user_id: number;
+      region: string;
+      administrator_role: string;
+      jabatan: string;
+    },
+  ) {
+    return this.membersService.createKepengurusan(body);
+  }
+
   @Patch('kepengurusan/replace')
   @UseGuards(AuthGuard)
   replaceKepengurusan(

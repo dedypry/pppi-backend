@@ -298,6 +298,33 @@ export class MembersService {
     return tree;
   }
 
+  async createKepengurusan(body: {
+    user_id: number;
+    region: string;
+    administrator_role: string;
+    jabatan: string;
+  }) {
+    const userId = Number(body.user_id);
+
+    if (!userId) {
+      throw new ForbiddenException('User wajib diisi');
+    }
+    if (!body.region || !body.administrator_role || !body.jabatan) {
+      throw new ForbiddenException('Wilayah, pengurus, dan jabatan wajib diisi');
+    }
+
+    const user = await UserModel.query().findById(userId);
+    if (!user) throw new NotFoundException('User tidak ditemukan');
+
+    await user.$query().patch({
+      region: body.region,
+      administrator_role: body.administrator_role,
+      job_title: JSON.stringify([String(body.jabatan).trim()]),
+    });
+
+    return 'Kepengurusan berhasil ditambahkan';
+  }
+
   async replaceKepengurusan(body: {
     from_user_id: number;
     to_user_id: number;
