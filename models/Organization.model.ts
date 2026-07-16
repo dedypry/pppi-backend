@@ -12,7 +12,9 @@ export class OrganizationModel extends Model {
 
   @Modifier
   child(query: AnyQueryBuilder) {
-    query.withGraphFetched('children(child)').orderBy('created_at', 'desc');
+    query
+      .withGraphFetched('[user.profile, children(child)]')
+      .orderBy('created_at', 'desc');
   }
 
   @BelongsToOne(() => UserModel, {

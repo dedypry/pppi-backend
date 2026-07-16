@@ -13,15 +13,31 @@ export class OrganizationsService {
   }
 
   async create(body: OrganitationCreateDto) {
-    await OrganizationModel.query().insertGraph({
-      id: body.id,
+    const payload = {
       title: body.title,
       description: body.description,
-      user_id: body.user_id,
-      parent_id: body.parent_id,
-    } as any);
+      user_id: body.user_id || null,
+      parent_id: body.parent_id ? Number(body.parent_id) : null,
+    } as any;
 
+    if (body.id) {
+      const existing = await OrganizationModel.query().findById(body.id);
+      if (!existing) throw new NotFoundException('Organisasi tidak ditemukan');
+
+      await existing.$query().patch(payload);
+      return 'Organisasi berhasil diperbaharui';
+    }
+
+    await OrganizationModel.query().insert(payload);
     return 'Organisasi berhasil di tambahkan';
+  }
+
+  async assignUser(id: number, userId: number) {
+    const existing = await OrganizationModel.query().findById(id);
+    if (!existing) throw new NotFoundException('Organisasi tidak ditemukan');
+
+    await existing.$query().patch({ user_id: userId });
+    return 'User berhasil ditetapkan ke organisasi';
   }
 
   async destroy(id: number) {

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,12 @@ export class OrganizationsController {
   @UseGuards(AuthGuard)
   createAndUpdate(@Body() body: OrganitationCreateDto) {
     return this.organizationsService.create(body);
+  }
+
+  @Patch(':id/assign-user')
+  @UseGuards(AuthGuard)
+  assignUser(@Param('id') id: number, @Body() body: { user_id: number }) {
+    return this.organizationsService.assignUser(id, Number(body.user_id));
   }
 
   @Delete(':id')
