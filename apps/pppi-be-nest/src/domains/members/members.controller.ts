@@ -65,7 +65,7 @@ export class MembersController {
         { header: 'Pengurus', key: 'pengurus', width: 28 },
         { header: 'Jabatan', key: 'jabatan', width: 16 },
         { header: 'Nama', key: 'nama', width: 32 },
-        { header: 'NIA', key: 'nia', width: 20, style: { numFmt: '@' } },
+        { header: 'NIA', key: 'nia', width: 20 },
         { header: 'Email', key: 'email', width: 28 },
         { header: 'Phone', key: 'phone', width: 16 },
         { header: 'Status Verifikasi', key: 'verification_status', width: 18 },
@@ -153,7 +153,7 @@ export class MembersController {
 
     const allHeaders = [
       { header: 'ID', key: 'id', width: 8 },
-      { header: 'NIA', key: 'nia', width: 20, style: { numFmt: '@' } },
+      { header: 'NIA', key: 'nia', width: 20 },
       { header: 'Gelar Depan', key: 'front_title', width: 14 },
       { header: 'Nama', key: 'name', width: 28 },
       { header: 'Gelar Belakang', key: 'back_title', width: 14 },
